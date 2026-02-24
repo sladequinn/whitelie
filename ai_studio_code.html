@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-black text-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WH!TE L!E | THE LAB</title>
+    
+    <!-- Typography: Inter Tight 900 for that Heavy Brutalist look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,900;1,900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { brutal: ['"Inter Tight"', 'sans-serif'] },
+                    colors: { 'whitelie-red': '#FF0000' }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; }
+        
+        /* The TikTok-style Container */
+        .master-feed {
+            height: 100vh;
+            height: 100dvh; /* Dynamic viewport for mobile */
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .master-feed::-webkit-scrollbar { display: none; }
+
+        .video-card {
+            height: 100vh;
+            height: 100dvh;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            position: relative;
+            background: #000;
+            border-bottom: 1px solid #222;
+        }
+
+        /* Brutalist Elements */
+        .brutal-btn {
+            background: #fff;
+            color: #000;
+            font-weight: 900;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+            border: 2px solid white;
+        }
+        .brutal-btn:hover {
+            background: #000;
+            color: #fff;
+        }
+
+        .drawer-blur {
+            backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.8);
+        }
+
+        /* Overlay text punch */
+        .text-punch {
+            text-shadow: 2px 2px 0px #000;
+            -webkit-text-stroke: 1px rgba(255,255,255,0.1);
+        }
+
+        iframe { pointer-events: none; } /* Prevents interaction with YT UI, keeps it feeling like a native app */
+    </style>
+</head>
+<body class="font-brutal antialiased">
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-0 left-0 w-full z-[90] flex justify-between items-center p-6 mix-blend-difference">
+        <div class="flex flex-col">
+            <span class="text-4xl tracking-tighter leading-none italic">WH!TE L!E</span>
+            <span class="text-[10px] tracking-[0.3em] uppercase opacity-70">Official Site</span>
+        </div>
+        <button onclick="toggleLab()" class="brutal-btn px-6 py-2 text-sm tracking-widest">THE LAB</button>
+    </nav>
+
+    <!-- MASTER FEED -->
+    <main id="feed" class="master-feed">
+        <!-- Content injected via JS -->
+    </main>
+
+    <!-- RIGHT SIDE SOCIAL OVERLAY (TikTok Style) -->
+    <div class="fixed right-4 bottom-32 z-50 flex flex-col gap-6 items-center">
+        <a href="https://open.spotify.com/artist/6IgPg8MO2tPuQFHcM6MF4o" target="_blank" class="w-12 h-12 bg-white rounded-full flex items-center justify-center p-2 hover:scale-110 transition-transform">
+            <img src="https://cdn-icons-png.flaticon.com/512/174/174872.png" alt="Spotify" class="w-full grayscale">
+        </a>
+        <a href="https://www.tiktok.com/@whitelie519" target="_blank" class="w-12 h-12 bg-white rounded-full flex items-center justify-center p-3 hover:scale-110 transition-transform">
+            <svg viewBox="0 0 24 24" class="w-full fill-black"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.17-2.89-.6-4.13-1.47V18c0 1.94-.96 3.82-2.72 4.73-1.76.91-3.95.84-5.63-.17-1.68-1.01-2.64-2.88-2.62-4.83.02-1.95 1.05-3.8 2.82-4.69 1.41-.71 3.1-.71 4.51-.01.01-1.35.01-2.7 0-4.05-2.11-.46-4.25.13-5.88 1.52-1.63 1.39-2.48 3.51-2.28 5.64.2 2.13 1.48 4.1 3.4 5.05 1.92.95 4.3.84 6.11-.31 1.81-1.15 2.84-3.26 2.65-5.39-.01-4.04-.01-8.08-.01-12.12-.02-1.31.02-2.61.02-3.91z"/></svg>
+        </a>
+    </div>
+
+    <!-- THE LAB: SHOP DRAWER -->
+    <aside id="lab-drawer" class="fixed inset-y-0 right-0 w-full md:w-[500px] z-[100] translate-x-full transition-transform duration-500 drawer-blur border-l-4 border-white p-8 flex flex-col">
+        <div class="flex justify-between items-center mb-12">
+            <h2 class="text-7xl italic leading-none tracking-tighter">THE LAB</h2>
+            <button onclick="toggleLab()" class="text-4xl hover:rotate-90 transition-transform">✕</button>
+        </div>
+
+        <div class="flex-grow space-y-12">
+            <!-- Product 1 -->
+            <div class="group">
+                <div class="flex justify-between items-end mb-4">
+                    <h3 class="text-3xl italic tracking-tighter">HAND-PRESSED SHIRT</h3>
+                    <span class="text-2xl opacity-50 font-light">( 45 )</span>
+                </div>
+                <p class="text-xs tracking-widest uppercase mb-6 opacity-60">Small batch. Screen-printed by WH!TE L!E. 10oz Cotton.</p>
+                <!-- REPLACE LINK BELOW WITH STRIPE LINK -->
+                <a href="https://buy.stripe.com/test_6oE9C5..." class="brutal-btn block w-full py-5 text-center text-xl italic tracking-tighter">PURCHASE</a>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="group">
+                <div class="flex justify-between items-end mb-4">
+                    <h3 class="text-3xl italic tracking-tighter">SIGNED VISION CD</h3>
+                    <span class="text-2xl opacity-50 font-light">( 20 )</span>
+                </div>
+                <p class="text-xs tracking-widest uppercase mb-6 opacity-60">Physical Media. Includes bonus unreleased demos.</p>
+                <!-- REPLACE LINK BELOW WITH STRIPE LINK -->
+                <a href="https://buy.stripe.com/test_..." class="brutal-btn block w-full py-5 text-center text-xl italic tracking-tighter">PURCHASE</a>
+            </div>
+        </div>
+
+        <!-- Personal Fulfillment Badge -->
+        <div class="mt-auto border-t-2 border-white pt-6">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-white flex items-center justify-center text-black text-xs font-black p-1 text-center leading-none">
+                    WL AUTHENTIC
+                </div>
+                <p class="text-[10px] uppercase tracking-widest leading-relaxed">
+                    Every order is hand-pressed, <br>signed & shipped by WH!TE L!E personally.
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    <script>
+        // MASTER FEED DATA
+        // To update: Swap the IDs with recent YouTube Shorts IDs or direct MP4 URLs
+        const feedData = [
+            { id: "M7lc1UVf-VE", title: "WH!TE_L!E_LIVE", type: "yt" },
+            { id: "dQw4w9WgXcQ", title: "VISION_001", type: "yt" },
+            { id: "3_Yf0v6E-S4", title: "THE_VOID", type: "yt" },
+            { id: "M7lc1UVf-VE", title: "LAB_WORK", type: "yt" },
+            { id: "dQw4w9WgXcQ", title: "PRESSING_SESSIONS", type: "yt" },
+            { id: "3_Yf0v6E-S4", title: "NORTH_SIDE", type: "yt" },
+            { id: "M7lc1UVf-VE", title: "NO_RULES", type: "yt" },
+            { id: "dQw4w9WgXcQ", title: "519_ENERGY", type: "yt" },
+            { id: "3_Yf0v6E-S4", title: "DIRECT_CUT", type: "yt" },
+            { id: "M7lc1UVf-VE", title: "FINALE", type: "yt" }
+        ];
+
+        const feed = document.getElementById('feed');
+
+        // Build the feed
+        feedData.forEach((item, index) => {
+            const section = document.createElement('section');
+            section.className = 'video-card';
+            section.innerHTML = `
+                <!-- Video Container -->
+                <div class="absolute inset-0 w-full h-full overflow-hidden">
+                    <iframe 
+                        id="player-${index}"
+                        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[115%] h-[115%] scale-150 pointer-events-none"
+                        src="https://www.youtube.com/embed/${item.id}?enablejsapi=1&autoplay=0&controls=0&loop=1&playlist=${item.id}&modestbranding=1&rel=0&mute=1" 
+                        frameborder="0" 
+                        allow="autoplay; encrypted-media" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+
+                <!-- Content Overlay -->
+                <div class="absolute bottom-10 left-6 z-40">
+                    <h2 class="text-6xl italic tracking-tighter text-punch mb-2">${item.title}</h2>
+                    <div class="flex gap-4">
+                        <button onclick="toggleLab()" class="bg-white text-black px-4 py-1 text-xs font-black uppercase">GET THIS LOOK</button>
+                        <button class="border border-white/30 bg-black/50 backdrop-blur text-white px-4 py-1 text-xs font-black uppercase">SHARE</button>
+                    </div>
+                </div>
+
+                <!-- Vignette -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40 pointer-events-none"></div>
+            `;
+            feed.appendChild(section);
+        });
+
+        // INTERSECTION OBSERVER LOGIC
+        // This stops the video when you scroll away and plays it when you enter
+        const observerOptions = {
+            threshold: 0.8
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const iframe = entry.target.querySelector('iframe');
+                if (entry.isIntersecting) {
+                    iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                } else {
+                    iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.video-card').forEach(card => observer.observe(card));
+
+        // SHOP DRAWER LOGIC
+        function toggleLab() {
+            const drawer = document.getElementById('lab-drawer');
+            drawer.classList.toggle('translate-x-full');
+        }
+
+        // Handle Mobile Scroll Jump
+        window.addEventListener('resize', () => {
+            let vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        });
+    </script>
+</body>
+</html>
