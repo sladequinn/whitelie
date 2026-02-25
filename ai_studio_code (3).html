@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-black text-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WH!TE L!E | THE LAB</title>
+
+    <!-- Typography: Inter Tight 900 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,900;1,900&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script async src="https://www.tiktok.com/embed.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { brutal: ['"Inter Tight"', 'sans-serif'] },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* FEED ENGINE: MOBILE FIRST SNAP */
+        .master-feed {
+            height: 100vh;
+            height: 100dvh;
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+            scrollbar-width: none;
+            background: #000;
+        }
+        .master-feed::-webkit-scrollbar { display: none; }
+
+        .video-card {
+            height: 100vh;
+            height: 100dvh;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #111;
+        }
+
+        /* BRUTALIST UI */
+        .drawer-transition {
+            transition: transform 0.5s cubic-bezier(0.9, 0, 0.1, 1);
+        }
+
+        .text-outline {
+            -webkit-text-stroke: 1px rgba(255,255,255,0.3);
+            color: transparent;
+        }
+
+        /* Responsive Embed Containers */
+        .embed-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+
+        iframe {
+            width: 100% !important;
+            height: 100% !important;
+            border: none;
+        }
+        
+        /* The Lab Button Polish */
+        .lab-btn {
+            background: white;
+            color: black;
+            font-weight: 900;
+            padding: 1rem 2rem;
+            letter-spacing: -0.05em;
+            transition: transform 0.1s;
+        }
+        .lab-btn:active { transform: scale(0.95); }
+    </style>
+</head>
+<body class="font-brutal antialiased overflow-hidden select-none">
+
+    <!-- GLOBAL NAV -->
+    <nav class="fixed top-0 left-0 w-full z-[100] flex justify-between items-center p-6 mix-blend-difference">
+        <div class="flex flex-col">
+            <h1 class="text-4xl italic leading-none tracking-tighter">WH!TE L!E</h1>
+            <span class="text-[10px] tracking-[0.4em] uppercase opacity-70">Lab Manifest 2.0</span>
+        </div>
+        <button onclick="toggleLab()" class="bg-white text-black px-6 py-2 text-xs font-black uppercase tracking-tighter">
+            THE LAB
+        </button>
+    </nav>
+
+    <!-- MASTER FEED -->
+    <main id="main-feed" class="master-feed">
+        <!-- Social contents injected via scrambled JS array -->
+    </main>
+
+    <!-- THE LAB: SHOP DRAWER -->
+    <aside id="lab-drawer" class="fixed inset-y-0 right-0 w-full md:w-[480px] z-[110] translate-x-full drawer-transition bg-white text-black p-8 flex flex-col shadow-2xl">
+        <div class="flex justify-between items-start mb-12">
+            <div>
+                <h2 class="text-7xl italic font-black leading-[0.75] tracking-tighter">THE<br>LAB</h2>
+                <p class="mt-4 uppercase text-[10px] tracking-widest font-bold opacity-40">Direct Studio Access</p>
+            </div>
+            <button onclick="toggleLab()" class="text-4xl hover:rotate-90 transition-transform">✕</button>
+        </div>
+
+        <div class="space-y-12">
+            <!-- Product 1 -->
+            <div class="group">
+                <div class="flex justify-between items-end mb-2">
+                    <h3 class="text-3xl italic font-black tracking-tighter uppercase leading-none">Hand-pressed Shirt</h3>
+                    <span class="text-2xl font-black opacity-30">( 45 )</span>
+                </div>
+                <p class="text-[11px] uppercase tracking-widest mb-6 opacity-60 leading-tight">
+                    Limited Run. Screen-printed personally by WH!TE L!E. 10oz heavyweight cotton.
+                </p>
+                <a href="https://buy.stripe.com/your_link_1" class="block w-full bg-black text-white py-5 text-center text-xl italic font-black hover:bg-zinc-800 transition-colors">
+                    SECURE ITEM
+                </a>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="group">
+                <div class="flex justify-between items-end mb-2">
+                    <h3 class="text-3xl italic font-black tracking-tighter uppercase leading-none">Signed Vision CD</h3>
+                    <span class="text-2xl font-black opacity-30">( 20 )</span>
+                </div>
+                <p class="text-[11px] uppercase tracking-widest mb-6 opacity-60 leading-tight">
+                    Physical copy. Includes exclusive Lab BTS digital content. Signed by the artist.
+                </p>
+                <a href="https://buy.stripe.com/your_link_2" class="block w-full bg-black text-white py-5 text-center text-xl italic font-black hover:bg-zinc-800 transition-colors">
+                    SECURE ITEM
+                </a>
+            </div>
+        </div>
+
+        <!-- Personal Fulfillment Badge -->
+        <div class="mt-auto border-t-4 border-black pt-8 flex items-center gap-4">
+            <div class="w-12 h-12 bg-black text-white flex items-center justify-center text-[10px] font-black p-1 text-center leading-none uppercase">
+                Direct<br>Fulfillment
+            </div>
+            <p class="text-[10px] uppercase font-bold tracking-widest leading-tight">
+                Hand-pressed & Shipped <br>by WH!TE L!E personally.
+            </p>
+        </div>
+    </aside>
+
+    <script>
+        // MASTER FEED DATA: Your provided links scrambled
+        const manifest = [
+            { type: 'tiktok', id: '7610042331902905616', title: 'VISION_MANIFEST' },
+            { type: 'instagram', id: 'DSkhUCRgOAk', title: 'LAB_PROCESS' },
+            { type: 'tiktok', id: '7501094486211169591', title: 'STUDIO_FLOW' },
+            { type: 'instagram', id: 'DUZJXC-AO71', title: 'VISION_GEAR' },
+            { type: 'tiktok', id: '7610441860607151376', title: 'LATEST_DROP' },
+            { type: 'instagram', id: 'DTbbKQeAP01', title: 'THE_VAULT' },
+            { type: 'tiktok', id: '7550280652961221894', title: 'NORTH_SIDE' }
+        ];
+
+        const feedContainer = document.getElementById('main-feed');
+
+        // SCRAMBLE LOGIC
+        const scrambledData = manifest.sort(() => Math.random() - 0.5);
+
+        // RENDER LOGIC
+        scrambledData.forEach((vid, index) => {
+            const section = document.createElement('section');
+            section.className = 'video-card';
+            
+            let embedContent = '';
+            if (vid.type === 'tiktok') {
+                embedContent = `
+                    <blockquote class="tiktok-embed" data-video-id="${vid.id}" style="width: 100%; height: 100%;">
+                        <section></section>
+                    </blockquote>
+                `;
+            } else if (vid.type === 'instagram') {
+                embedContent = `
+                    <iframe src="https://www.instagram.com/reels/${vid.id}/embed" 
+                            class="w-full h-full" 
+                            scrolling="no" 
+                            allowtransparency="true">
+                    </iframe>
+                `;
+            }
+
+            section.innerHTML = `
+                <div class="embed-container">${embedContent}</div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40 pointer-events-none"></div>
+                <div class="absolute bottom-12 left-6 z-50">
+                    <h2 class="text-6xl italic font-black tracking-tighter leading-none mb-6 uppercase text-white">${vid.title}</h2>
+                    <button onclick="toggleLab()" class="lab-btn">GET THE GEAR</button>
+                </div>
+            `;
+            feedContainer.appendChild(section);
+        });
+
+        // INTERSECTION OBSERVER: Optimized Loading
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const container = entry.target.querySelector('.embed-container');
+                if (entry.isIntersecting) {
+                    container.style.opacity = "1";
+                    container.style.transform = "scale(1)";
+                } else {
+                    container.style.opacity = "0.3";
+                    container.style.transform = "scale(0.95)";
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.video-card').forEach(card => observer.observe(card));
+
+        // UI HELPERS
+        function toggleLab() {
+            document.getElementById('lab-drawer').classList.toggle('translate-x-full');
+        }
+
+        // Auto-refresh TikTok SDK on dynamic load
+        window.addEventListener('load', () => {
+            if (window.TiktokSDK) {
+                window.TiktokSDK.load();
+            }
+        });
+    </script>
+</body>
+</html>
