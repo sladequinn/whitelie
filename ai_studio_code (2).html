@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-black text-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WH!TE L!E | THE LAB</title>
+
+    <!-- Typography: Inter Tight 900 (Heavy Brutalist) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,900;1,900&display=swap" rel="stylesheet">
+
+    <!-- Scripts: Tailwind & Social SDKs -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script async src="https://www.tiktok.com/embed.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { brutal: ['"Inter Tight"', 'sans-serif'] },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* TIKTOK SCROLL SNAP LOGIC */
+        .master-feed {
+            height: 100vh;
+            height: 100dvh;
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            background: #000;
+        }
+        .master-feed::-webkit-scrollbar { display: none; }
+
+        .video-card {
+            height: 100vh;
+            height: 100dvh;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* BRUTALIST UI ELEMENTS */
+        .drawer-transition {
+            transition: transform 0.6s cubic-bezier(0.9, 0, 0.1, 1);
+        }
+
+        .heavy-border { border: 4px solid white; }
+        
+        .nav-link {
+            letter-spacing: -0.05em;
+            transition: all 0.2s;
+        }
+
+        /* Masking the Embed UI to keep it Sleek */
+        .video-overlay {
+            background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.8) 100%);
+            pointer-events: none;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* User swipes the container, not the iframe */
+        }
+    </style>
+</head>
+<body class="font-brutal antialiased selection:bg-white selection:text-black">
+
+    <!-- GLOBAL NAVIGATION -->
+    <nav class="fixed top-0 left-0 w-full z-[100] flex justify-between items-center p-6 mix-blend-difference">
+        <div class="flex flex-col">
+            <span class="text-4xl italic leading-none tracking-tighter">WH!TE L!E</span>
+            <span class="text-[10px] tracking-[0.4em] uppercase opacity-70">Official Studio</span>
+        </div>
+        <button onclick="toggleLab()" class="bg-white text-black px-8 py-3 text-sm font-black uppercase hover:invert transition-all">
+            THE LAB
+        </button>
+    </nav>
+
+    <!-- MASTER FEED -->
+    <main id="main-feed" class="master-feed">
+        <!-- Social Videos Injected Here -->
+    </main>
+
+    <!-- THE LAB: SHOP DRAWER -->
+    <aside id="lab-drawer" class="fixed inset-y-0 right-0 w-full md:w-[500px] z-[110] translate-x-full drawer-transition bg-white text-black p-8 flex flex-col">
+        <div class="flex justify-between items-start mb-16">
+            <h2 class="text-8xl italic font-black leading-[0.75] tracking-tighter">THE<br>LAB</h2>
+            <button onclick="toggleLab()" class="text-5xl font-light hover:rotate-90 transition-transform">✕</button>
+        </div>
+
+        <div class="space-y-12">
+            <!-- Product 1 -->
+            <div class="border-b-8 border-black pb-8">
+                <div class="flex justify-between items-end mb-4">
+                    <h3 class="text-3xl italic font-black tracking-tighter uppercase">Hand-pressed Shirt</h3>
+                    <span class="text-2xl font-black italic">45.00</span>
+                </div>
+                <p class="text-xs uppercase tracking-widest mb-8 opacity-60 leading-relaxed font-bold">
+                    Heavyweight Cotton. Hand-screened in the studio by White Lie. No two pieces are identical.
+                </p>
+                <a href="https://buy.stripe.com/your-link-here" class="block w-full bg-black text-white py-6 text-center text-2xl font-black italic hover:bg-zinc-900 transition-colors">
+                    BUY DIRECT
+                </a>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="border-b-8 border-black pb-8">
+                <div class="flex justify-between items-end mb-4">
+                    <h3 class="text-3xl italic font-black tracking-tighter uppercase">Signed Vision CD</h3>
+                    <span class="text-2xl font-black italic">20.00</span>
+                </div>
+                <p class="text-xs uppercase tracking-widest mb-8 opacity-60 leading-relaxed font-bold">
+                    Physical Edition. Explicit Version. Signed personally at the lab.
+                </p>
+                <a href="https://buy.stripe.com/your-link-here" class="block w-full bg-black text-white py-6 text-center text-2xl font-black italic hover:bg-zinc-900 transition-colors">
+                    BUY DIRECT
+                </a>
+            </div>
+        </div>
+
+        <!-- Personal Fulfillment Badge -->
+        <div class="mt-auto bg-black text-white p-6 flex items-center gap-5">
+            <div class="text-3xl italic font-black leading-none border-r border-white/30 pr-5">WL<br>LABS</div>
+            <p class="text-[10px] uppercase font-bold tracking-[0.2em] leading-tight">
+                Hand-pressed, Signed, <br>& Shipped by WH!TE L!E.
+            </p>
+        </div>
+    </aside>
+
+    <script>
+        /**
+         * MASTER FEED MANIFEST
+         * Paste your TikTok IDs or YouTube Shorts IDs here.
+         * TikTok ID: Found in the URL (e.g., 7123456789123456789)
+         * YouTube ID: Found in the URL after /shorts/ (e.g., abcDeFG123)
+         */
+        const feedData = [
+            { type: 'youtube', id: '7nN0S0h0S0k', title: 'VISION_01' },
+            { type: 'tiktok', id: '7344558832014036256', title: 'STUDIO_FLOW' },
+            { type: 'youtube', id: '7nN0S0h0S0k', title: 'LAB_SESSIONS' },
+            { type: 'tiktok', id: '7344558832014036256', title: 'NORTH_SIDE' },
+            { type: 'youtube', id: '7nN0S0h0S0k', title: 'THE_DROP' },
+            { type: 'tiktok', id: '7344558832014036256', title: 'WHITE_LIE_V3' },
+            { type: 'youtube', id: '7nN0S0h0S0k', title: 'PROCESS_01' },
+            { type: 'tiktok', id: '7344558832014036256', title: 'STREET_SYNC' },
+            { type: 'youtube', id: '7nN0S0h0S0k', title: 'FINAL_CUT' },
+            { type: 'tiktok', id: '7344558832014036256', title: 'THE_END' }
+        ];
+
+        const feedContainer = document.getElementById('main-feed');
+        let players = []; // Stores YouTube Player instances
+
+        // INITIALIZE FEED
+        function buildFeed() {
+            feedData.forEach((vid, index) => {
+                const section = document.createElement('section');
+                section.className = 'video-card';
+                
+                if (vid.type === 'youtube') {
+                    section.innerHTML = `
+                        <div id="yt-player-${index}" class="w-full h-full scale-[1.5]"></div>
+                        <div class="video-overlay absolute inset-0 z-10"></div>
+                        <div class="absolute bottom-12 left-6 z-20">
+                            <h2 class="text-7xl italic font-black tracking-tighter mb-4 uppercase">${vid.title}</h2>
+                            <button onclick="toggleLab()" class="heavy-border bg-white text-black px-6 py-2 text-xs font-black uppercase">BUY THIS DROP</button>
+                        </div>
+                    `;
+                } else if (vid.type === 'tiktok') {
+                    section.innerHTML = `
+                        <blockquote class="tiktok-embed w-full h-full" data-video-id="${vid.id}" style="max-width: 605px; min-width: 325px;">
+                            <section></section>
+                        </blockquote>
+                        <div class="video-overlay absolute inset-0 z-10"></div>
+                        <div class="absolute bottom-12 left-6 z-20">
+                            <h2 class="text-7xl italic font-black tracking-tighter mb-4 uppercase text-white">${vid.title}</h2>
+                            <button onclick="toggleLab()" class="heavy-border bg-white text-black px-6 py-2 text-xs font-black uppercase">BUY THIS DROP</button>
+                        </div>
+                    `;
+                }
+                feedContainer.appendChild(section);
+            });
+        }
+
+        // YOUTUBE API SETUP
+        function onYouTubeIframeAPIReady() {
+            feedData.forEach((vid, index) => {
+                if (vid.type === 'youtube') {
+                    players[index] = new YT.Player(`yt-player-${index}`, {
+                        videoId: vid.id,
+                        playerVars: {
+                            'autoplay': 0,
+                            'controls': 0,
+                            'rel': 0,
+                            'loop': 1,
+                            'playlist': vid.id,
+                            'modestbranding': 1,
+                            'mute': 1
+                        }
+                    });
+                }
+            });
+        }
+
+        // INTERSECTION OBSERVER LOGIC
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const index = Array.from(feedContainer.children).indexOf(entry.target);
+                const vidType = feedData[index].type;
+
+                if (entry.isIntersecting) {
+                    if (vidType === 'youtube' && players[index]) {
+                        players[index].playVideo();
+                    }
+                } else {
+                    if (vidType === 'youtube' && players[index]) {
+                        players[index].pauseVideo();
+                    }
+                }
+            });
+        }, { threshold: 0.7 });
+
+        // DRAWER TOGGLE
+        function toggleLab() {
+            document.getElementById('lab-drawer').classList.toggle('translate-x-full');
+        }
+
+        // INITIALIZE
+        buildFeed();
+        document.querySelectorAll('.video-card').forEach(card => observer.observe(card));
+
+    </script>
+</body>
+</html>
