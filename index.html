@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WH!TE L!E | STORE</title>
+    <title>WH!TE L!E</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,900;1,900&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <script async src="https://www.tiktok.com/embed.js"></script>
-    
     <script>
         tailwind.config = {
             theme: {
@@ -23,196 +21,182 @@
     </script>
 
     <style>
-        /* MOBILE VIEWPORT FOR DESKTOP */
-        body { background-color: #000; overflow: hidden; }
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; }
         
-        .app-container {
+        /* DESKTOP BOXING */
+        .app-shell {
             width: 100%;
-            height: 100vh;
             height: 100dvh;
-            max-width: 500px; /* Forces phone-width on desktop */
+            max-width: 500px;
             margin: 0 auto;
             position: relative;
             background: #000;
-            border-left: 1px solid #222;
-            border-right: 1px solid #222;
         }
 
-        /* FEED ENGINE */
-        .master-feed {
+        /* CLEAN FEED */
+        .feed {
             height: 100%;
             scroll-snap-type: y mandatory;
             overflow-y: scroll;
             scrollbar-width: none;
-            -ms-overflow-style: none;
         }
-        .master-feed::-webkit-scrollbar { display: none; }
+        .feed::-webkit-scrollbar { display: none; }
 
-        .video-card {
-            height: 100vh;
-            height: 100dvh;
+        .slide {
+            height: 100%;
             scroll-snap-align: start;
             scroll-snap-stop: always;
             position: relative;
-            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        /* RATIO FIX: Forcing TikTok and IG to fill the card */
-        .embed-wrapper {
+        video {
             width: 100%;
             height: 100%;
-            transform: scale(1.02); /* Slight zoom to hide borders */
-        }
-        
-        iframe {
-            width: 100% !important;
-            height: 100% !important;
-            border: none;
+            object-fit: cover; /* This fixes the ratio */
+            pointer-events: none;
         }
 
-        .drawer-transition {
+        /* MINIMALIST OVERLAYS */
+        .overlay-menu {
             transition: transform 0.4s cubic-bezier(0.9, 0, 0.1, 1);
+            background: rgba(0,0,0,0.98);
         }
 
-        .brutal-btn {
+        .btn-ui {
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            border-bottom: 2px solid white;
+            padding-bottom: 2px;
+        }
+
+        .buy-tag {
             background: white;
             color: black;
             font-weight: 900;
-            padding: 10px 20px;
+            padding: 12px 24px;
+            font-size: 14px;
             text-transform: uppercase;
-            font-size: 12px;
-            letter-spacing: 0.1em;
+            font-style: italic;
         }
     </style>
 </head>
 <body class="font-brutal antialiased">
 
-    <div class="app-container">
+    <div class="app-shell">
         
-        <!-- NAVIGATION -->
-        <nav class="absolute top-0 left-0 w-full z-[100] flex justify-between items-center p-6 mix-blend-difference">
-            <button onclick="toggleOverlay('links-menu')" class="text-white text-xs font-black uppercase tracking-widest border-b-2 border-white">LINKS</button>
-            <button onclick="toggleOverlay('store-drawer')" class="brutal-btn">STORE</button>
+        <!-- MINIMAL NAV -->
+        <nav class="absolute top-0 left-0 w-full z-[100] flex justify-between items-center p-8 mix-blend-difference">
+            <button onclick="toggleMenu('links')" class="btn-ui">LINKS</button>
+            <button onclick="toggleMenu('store')" class="btn-ui">STORE</button>
         </nav>
 
-        <!-- MASTER FEED -->
-        <main id="main-feed" class="master-feed">
-            <!-- Videos injected via JS -->
+        <!-- NATIVE VIDEO FEED -->
+        <main id="feed" class="feed">
+            <!-- Videos will be injected here -->
         </main>
 
-        <!-- LINKS MENU OVERLAY -->
-        <div id="links-menu" class="fixed inset-0 z-[120] bg-black translate-y-full drawer-transition p-8 flex flex-col">
-            <div class="flex justify-between items-center mb-12">
-                <h2 class="text-5xl italic font-black tracking-tighter uppercase">CONNECT</h2>
-                <button onclick="toggleOverlay('links-menu')" class="text-4xl font-light">✕</button>
-            </div>
-            
-            <div class="space-y-4">
-                <a href="https://open.spotify.com/artist/6IgPg8MO2tPuQFHcM6MF4o" target="_blank" class="block w-full border-4 border-white p-6 text-3xl italic font-black hover:bg-white hover:text-black transition-all">SPOTIFY</a>
-                <a href="https://music.apple.com/ca/artist/lil-white-lie/1496696984" target="_blank" class="block w-full border-4 border-white p-6 text-3xl italic font-black hover:bg-white hover:text-black transition-all">APPLE MUSIC</a>
-                <a href="https://www.tiktok.com/@whitelie519" target="_blank" class="block w-full border-4 border-white p-6 text-3xl italic font-black hover:bg-white hover:text-black transition-all">TIKTOK</a>
-                <a href="https://www.instagram.com/lilwhitelie519" target="_blank" class="block w-full border-4 border-white p-6 text-3xl italic font-black hover:bg-white hover:text-black transition-all">INSTAGRAM</a>
-                <a href="https://www.youtube.com/@ThaLilWhiteLie" target="_blank" class="block w-full border-4 border-white p-6 text-3xl italic font-black hover:bg-white hover:text-black transition-all">YOUTUBE</a>
+        <!-- UI OVERLAYS -->
+        
+        <!-- LINKS -->
+        <div id="links" class="fixed inset-0 z-[200] overlay-menu translate-y-full p-12 flex flex-col justify-center">
+            <button onclick="toggleMenu('links')" class="absolute top-10 right-10 text-3xl font-light">✕</button>
+            <div class="space-y-8">
+                <a href="https://open.spotify.com/artist/6IgPg8MO2tPuQFHcM6MF4o" target="_blank" class="block text-5xl italic font-black tracking-tighter hover:line-through">SPOTIFY</a>
+                <a href="https://music.apple.com/ca/artist/lil-white-lie/1496696984" target="_blank" class="block text-5xl italic font-black tracking-tighter hover:line-through">APPLE</a>
+                <a href="https://www.tiktok.com/@whitelie519" target="_blank" class="block text-5xl italic font-black tracking-tighter hover:line-through">TIKTOK</a>
+                <a href="https://www.instagram.com/lilwhitelie519" target="_blank" class="block text-5xl italic font-black tracking-tighter hover:line-through">INSTAGRAM</a>
             </div>
         </div>
 
-        <!-- STORE DRAWER -->
-        <aside id="store-drawer" class="fixed inset-0 z-[120] bg-white text-black translate-x-full drawer-transition p-8 flex flex-col">
-            <div class="flex justify-between items-center mb-16">
-                <h2 class="text-6xl italic font-black tracking-tighter uppercase">STORE</h2>
-                <button onclick="toggleOverlay('store-drawer')" class="text-4xl font-light">✕</button>
-            </div>
-
+        <!-- STORE -->
+        <div id="store" class="fixed inset-0 z-[200] overlay-menu translate-x-full p-12 flex flex-col">
+            <button onclick="toggleMenu('store')" class="absolute top-10 right-10 text-3xl font-light">✕</button>
+            <h2 class="text-7xl font-black italic tracking-tighter mb-16">STORE</h2>
+            
             <div class="space-y-12">
-                <div class="border-b-4 border-black pb-8">
-                    <div class="flex justify-between items-end mb-2">
-                        <h3 class="text-3xl italic font-black tracking-tighter uppercase">Hand-pressed Shirt</h3>
-                        <span class="text-2xl font-black opacity-30">45</span>
+                <div class="flex justify-between items-center border-b border-white/20 pb-6">
+                    <div>
+                        <p class="text-2xl font-black italic">PRESSED SHIRT</p>
+                        <p class="text-[10px] opacity-50 tracking-widest uppercase mt-1">Direct from Lab</p>
                     </div>
-                    <p class="text-[11px] uppercase tracking-widest mb-6 font-bold opacity-60">Limited Edition Studio Press.</p>
-                    <a href="https://buy.stripe.com/example1" class="block w-full bg-black text-white py-5 text-center text-xl italic font-black">BUY NOW</a>
+                    <a href="#" class="bg-white text-black px-6 py-2 font-black italic">45</a>
                 </div>
-
-                <div class="border-b-4 border-black pb-8">
-                    <div class="flex justify-between items-end mb-2">
-                        <h3 class="text-3xl italic font-black tracking-tighter uppercase">Signed Vision CD</h3>
-                        <span class="text-2xl font-black opacity-30">20</span>
+                <div class="flex justify-between items-center border-b border-white/20 pb-6">
+                    <div>
+                        <p class="text-2xl font-black italic">VISION CD</p>
+                        <p class="text-[10px] opacity-50 tracking-widest uppercase mt-1">Signed Copy</p>
                     </div>
-                    <p class="text-[11px] uppercase tracking-widest mb-6 font-bold opacity-60">Physical Media. Signed by White Lie.</p>
-                    <a href="https://buy.stripe.com/example2" class="block w-full bg-black text-white py-5 text-center text-xl italic font-black">BUY NOW</a>
+                    <a href="#" class="bg-white text-black px-6 py-2 font-black italic">20</a>
                 </div>
             </div>
-
-            <p class="mt-auto text-[10px] uppercase font-black tracking-[0.3em] text-center border-2 border-black p-3">
-                Hand-pressed & Shipped by WH!TE L!E
-            </p>
-        </aside>
+            
+            <p class="mt-auto text-[9px] uppercase tracking-[0.4em] opacity-40 text-center">Hand-pressed by WH!TE L!E</p>
+        </div>
 
     </div>
 
     <script>
-        // FEED MANIFEST
-        const manifest = [
-            { type: 'tiktok', id: '7610042331902905616' },
-            { type: 'instagram', id: 'DSkhUCRgOAk' },
-            { type: 'tiktok', id: '7501094486211169591' },
-            { type: 'instagram', id: 'DUZJXC-AO71' },
-            { type: 'tiktok', id: '7610441860607151376' },
-            { type: 'instagram', id: 'DTbbKQeAP01' },
-            { type: 'tiktok', id: '7550280652961221894' }
+        // MASTER VIDEO LIST
+        // For production: Download your TikToks as MP4s and replace these URLs
+        const videos = [
+            "https://v1.bg.it/v/mixkit-girl-in-neon-light-dancing-alone-34446-large.mp4",
+            "https://v1.bg.it/v/mixkit-portrait-of-a-man-with-neon-lights-2292-large.mp4",
+            "https://v1.bg.it/v/mixkit-man-dancing-under-a-street-light-at-night-40031-large.mp4",
+            "https://v1.bg.it/v/mixkit-young-man-dancing-in-a-nightclub-40032-large.mp4"
         ];
 
-        // SCRAMBLE
-        const shuffled = manifest.sort(() => Math.random() - 0.5);
+        const feed = document.getElementById('feed');
 
-        const feed = document.getElementById('main-feed');
-
-        // GENERATE CARDS
-        shuffled.forEach(vid => {
-            const card = document.createElement('section');
-            card.className = 'video-card';
-            
-            let html = '';
-            if (vid.type === 'tiktok') {
-                html = `
-                    <div class="embed-wrapper">
-                        <iframe src="https://www.tiktok.com/embed/v2/${vid.id}" 
-                                allow="autoplay; fullscreen" 
-                                class="w-full h-full"></iframe>
-                    </div>
-                `;
-            } else {
-                html = `
-                    <div class="embed-wrapper">
-                        <iframe src="https://www.instagram.com/reels/${vid.id}/embed" 
-                                scrolling="no" 
-                                class="w-full h-full"></iframe>
-                    </div>
-                `;
-            }
-
-            card.innerHTML = `
-                ${html}
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
-                <div class="absolute bottom-10 left-6 z-50">
-                    <button onclick="toggleOverlay('store-drawer')" class="brutal-btn">BUY THIS GEAR</button>
+        // GENERATE SLIDES
+        videos.forEach(src => {
+            const slide = document.createElement('section');
+            slide.className = 'slide';
+            slide.innerHTML = `
+                <video src="${src}" loop playsinline muted autoplay></video>
+                <div class="absolute bottom-12 left-0 w-full flex justify-center z-50">
+                    <button onclick="toggleMenu('store')" class="buy-tag">BUY THIS LOOK</button>
                 </div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none"></div>
             `;
-            feed.appendChild(card);
+            feed.appendChild(slide);
         });
 
-        // UI LOGIC
-        function toggleOverlay(id) {
-            const el = document.getElementById(id);
-            if (id === 'links-menu') {
-                el.classList.toggle('translate-y-full');
+        // INTERSECTION OBSERVER (Auto-play/pause)
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const video = entry.target.querySelector('video');
+                if (entry.isIntersecting) {
+                    video.play();
+                } else {
+                    video.pause();
+                }
+            });
+        }, { threshold: 0.8 });
+
+        document.querySelectorAll('.slide').forEach(s => observer.observe(s));
+
+        // UI CONTROLS
+        function toggleMenu(id) {
+            const menu = document.getElementById(id);
+            if (id === 'links') {
+                menu.classList.toggle('translate-y-full');
             } else {
-                el.classList.toggle('translate-x-full');
+                menu.classList.toggle('translate-x-full');
             }
         }
+
+        // TAP TO UNMUTE
+        document.body.addEventListener('click', (e) => {
+            if(e.target.closest('.slide')) {
+                const v = e.target.closest('.slide').querySelector('video');
+                v.muted = !v.muted;
+            }
+        });
     </script>
 </body>
 </html>
