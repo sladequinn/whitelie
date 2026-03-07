@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WH!TE L!E</title>
+    <title>WH!TE L!E | OFFICIAL</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,31 +14,32 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { brutal: ['"Inter Tight"', 'sans-serif'] },
+                    fontFamily: { brutal:['"Inter Tight"', 'sans-serif'] },
                 }
             }
         }
     </script>
 
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; }
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; touch-action: pan-y; }
         
-        /* DESKTOP BOXING */
+        /* DESKTOP BOXING - Keeps it looking like a phone on big screens */
         .app-shell {
             width: 100%;
             height: 100dvh;
             max-width: 500px;
             margin: 0 auto;
             position: relative;
-            background: #000;
+            background: #111;
         }
 
-        /* CLEAN FEED */
+        /* NATIVE VIDEO FEED */
         .feed {
             height: 100%;
             scroll-snap-type: y mandatory;
             overflow-y: scroll;
             scrollbar-width: none;
+            background: #000;
         }
         .feed::-webkit-scrollbar { display: none; }
 
@@ -47,138 +48,210 @@
             scroll-snap-align: start;
             scroll-snap-stop: always;
             position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: #000;
         }
 
         video {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* This fixes the ratio */
+            object-fit: cover;
             pointer-events: none;
+            filter: contrast(1.1) brightness(0.9);
         }
 
-        /* MINIMALIST OVERLAYS */
+        /* HUD UI Elements */
+        .hud-shadow {
+            text-shadow: 0px 2px 10px rgba(0,0,0,0.9), 0px 0px 4px rgba(0,0,0,0.5);
+        }
+
+        .tuner-btn {
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            opacity: 0.3;
+            transition: all 0.2s;
+            text-align: left;
+        }
+        .tuner-btn.active { opacity: 1; }
+        .tuner-btn.active::before {
+            content: '■ ';
+            font-size: 8px;
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+
         .overlay-menu {
-            transition: transform 0.4s cubic-bezier(0.9, 0, 0.1, 1);
+            transition: transform 0.4s cubic-bezier(0.85, 0, 0.15, 1);
             background: rgba(0,0,0,0.98);
-        }
-
-        .btn-ui {
-            font-size: 10px;
-            font-weight: 900;
-            letter-spacing: 0.3em;
-            text-transform: uppercase;
-            border-bottom: 2px solid white;
-            padding-bottom: 2px;
-        }
-
-        .buy-tag {
-            background: white;
-            color: black;
-            font-weight: 900;
-            padding: 12px 24px;
-            font-size: 14px;
-            text-transform: uppercase;
-            font-style: italic;
         }
     </style>
 </head>
-<body class="font-brutal antialiased">
+<body class="font-brutal antialiased text-white selection:bg-white selection:text-black">
 
     <div class="app-shell">
         
-        <!-- MINIMAL NAV -->
-        <nav class="absolute top-0 left-0 w-full z-[100] flex justify-between items-center p-8 mix-blend-difference">
-            <button onclick="toggleMenu('links')" class="btn-ui">LINKS</button>
-            <button onclick="toggleMenu('store')" class="btn-ui">STORE</button>
+        <!-- THE TUNER (TOP LEFT) -->
+        <nav class="absolute top-10 left-6 z-[100] flex flex-col gap-4 items-start hud-shadow pointer-events-auto">
+            <button onclick="switchChannel('featured')" id="tab-featured" class="tuner-btn active">FEATURED</button>
+            <button onclick="switchChannel('duets')" id="tab-duets" class="tuner-btn">DUETS</button>
+            <button onclick="switchChannel('munchtime')" id="tab-munchtime" class="tuner-btn">MUNCHTIME</button>
         </nav>
 
-        <!-- NATIVE VIDEO FEED -->
-        <main id="feed" class="feed">
-            <!-- Videos will be injected here -->
-        </main>
-
-        <!-- UI OVERLAYS -->
-        
-        <!-- LINKS -->
-        <div id="links" class="fixed inset-0 z-[200] overlay-menu translate-y-full p-12 flex flex-col justify-center">
-            <button onclick="toggleMenu('links')" class="absolute top-10 right-10 text-3xl font-light">✕</button>
-            <div class="space-y-8">
-                <a href="https://open.spotify.com/artist/6IgPg8MO2tPuQFHcM6MF4o" target="_blank" class="block text-5xl italic font-black tracking-tighter hover:line-through">SPOTIFY</a>
-                <a href="https://music.apple.com/ca/artist/lil-white-lie/1496696984" target="_blank" class="block text-5xl italic font-black tracking-tighter hover:line-through">APPLE</a>
-                <a href="https://www.tiktok.com/@whitelie519" target="_blank" class="block text-5xl italic font-black tracking-tighter hover:line-through">TIKTOK</a>
-                <a href="https://www.instagram.com/lilwhitelie519" target="_blank" class="block text-5xl italic font-black tracking-tighter hover:line-through">INSTAGRAM</a>
-            </div>
+        <!-- THE ACTIONS (BOTTOM RIGHT) -->
+        <div class="absolute bottom-10 right-6 z-[100] flex flex-col gap-3 items-end pointer-events-none">
+            <button onclick="toggleMenu('store')" class="bg-white text-black px-6 py-3 text-[11px] font-black uppercase tracking-widest pointer-events-auto hover:invert transition-all">
+                STORE
+            </button>
+            <button onclick="toggleMenu('links')" class="border-2 border-white/50 bg-black/20 backdrop-blur-sm text-white px-6 py-2 text-[11px] font-black uppercase tracking-widest pointer-events-auto hover:bg-white hover:text-black transition-all">
+                LINKS
+            </button>
         </div>
 
-        <!-- STORE -->
-        <div id="store" class="fixed inset-0 z-[200] overlay-menu translate-x-full p-12 flex flex-col">
-            <button onclick="toggleMenu('store')" class="absolute top-10 right-10 text-3xl font-light">✕</button>
+        <!-- THE BRAND (BOTTOM LEFT) -->
+        <div class="absolute bottom-10 left-6 z-[100] hud-shadow pointer-events-none">
+            <h1 class="text-4xl italic font-black tracking-tighter leading-none">WH!TE<br>L!E</h1>
+            <p class="text-[8px] uppercase tracking-[0.4em] mt-2 opacity-60">Manifest 2.0</p>
+        </div>
+
+        <!-- VIDEO FEED -->
+        <main id="feed" class="feed">
+            <!-- Videos injected here based on channel -->
+        </main>
+
+        <!-- TAP TO UNMUTE TOAST -->
+        <div id="unmute-toast" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[90] text-[10px] uppercase tracking-[0.5em] opacity-60 pointer-events-none transition-opacity duration-500 bg-black/50 px-4 py-2 rounded-full backdrop-blur-md">
+            Tap to Unmute
+        </div>
+
+        <!-- ================= OVERLAYS ================= -->
+        
+        <!-- LINKS OVERLAY -->
+        <div id="links" class="fixed inset-0 z-[200] overlay-menu translate-y-full p-10 flex flex-col justify-center">
+            <button onclick="toggleMenu('links')" class="absolute top-10 right-8 text-4xl font-light">✕</button>
+            <div class="space-y-6">
+                <a href="https://open.spotify.com/artist/6IgPg8MO2tPuQFHcM6MF4o" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:opacity-50 transition-opacity">SPOTIFY</a>
+                <a href="https://music.apple.com/ca/artist/lil-white-lie/1496696984" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:opacity-50 transition-opacity">APPLE MUSIC</a>
+                <a href="https://www.tiktok.com/@whitelie519" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:opacity-50 transition-opacity">TIKTOK</a>
+                <a href="https://www.instagram.com/lilwhitelie519" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:opacity-50 transition-opacity">INSTAGRAM</a>
+                <a href="https://www.youtube.com/@ThaLilWhiteLie" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:opacity-50 transition-opacity">YOUTUBE</a>
+            </div>
+            <p class="absolute bottom-10 left-10 text-[9px] uppercase tracking-[0.4em] opacity-30">Connect direct</p>
+        </div>
+
+        <!-- STORE OVERLAY -->
+        <div id="store" class="fixed inset-0 z-[200] overlay-menu translate-x-full p-10 flex flex-col border-l border-white/10">
+            <button onclick="toggleMenu('store')" class="absolute top-10 right-8 text-4xl font-light">✕</button>
             <h2 class="text-7xl font-black italic tracking-tighter mb-16">STORE</h2>
             
-            <div class="space-y-12">
-                <div class="flex justify-between items-center border-b border-white/20 pb-6">
-                    <div>
-                        <p class="text-2xl font-black italic">PRESSED SHIRT</p>
-                        <p class="text-[10px] opacity-50 tracking-widest uppercase mt-1">Direct from Lab</p>
-                    </div>
-                    <a href="#" class="bg-white text-black px-6 py-2 font-black italic">45</a>
+            <div class="space-y-12 overflow-y-auto">
+                <div class="border-b border-white/20 pb-8">
+                    <p class="text-3xl font-black italic tracking-tighter uppercase mb-1">Hand-Pressed Shirt</p>
+                    <p class="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-6 font-bold">Direct from the Lab</p>
+                    <a href="https://buy.stripe.com/test_link_here" class="inline-block bg-white text-black px-8 py-3 font-black italic text-lg hover:invert transition-all">SECURE ( 45 )</a>
                 </div>
-                <div class="flex justify-between items-center border-b border-white/20 pb-6">
-                    <div>
-                        <p class="text-2xl font-black italic">VISION CD</p>
-                        <p class="text-[10px] opacity-50 tracking-widest uppercase mt-1">Signed Copy</p>
-                    </div>
-                    <a href="#" class="bg-white text-black px-6 py-2 font-black italic">20</a>
+
+                <div class="border-b border-white/20 pb-8">
+                    <p class="text-3xl font-black italic tracking-tighter uppercase mb-1">Signed Vision CD</p>
+                    <p class="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-6 font-bold">Physical Media</p>
+                    <a href="https://buy.stripe.com/test_link_here" class="inline-block bg-white text-black px-8 py-3 font-black italic text-lg hover:invert transition-all">SECURE ( 20 )</a>
                 </div>
             </div>
             
-            <p class="mt-auto text-[9px] uppercase tracking-[0.4em] opacity-40 text-center">Hand-pressed by WH!TE L!E</p>
+            <p class="mt-auto text-[10px] uppercase font-black tracking-[0.3em] text-center border-t border-white/20 pt-6">
+                Hand-pressed & Shipped by WH!TE L!E
+            </p>
         </div>
 
     </div>
 
     <script>
-        // MASTER VIDEO LIST
-        // For production: Download your TikToks as MP4s and replace these URLs
-        const videos = [
-            "https://v1.bg.it/v/mixkit-girl-in-neon-light-dancing-alone-34446-large.mp4",
-            "https://v1.bg.it/v/mixkit-portrait-of-a-man-with-neon-lights-2292-large.mp4",
-            "https://v1.bg.it/v/mixkit-man-dancing-under-a-street-light-at-night-40031-large.mp4",
-            "https://v1.bg.it/v/mixkit-young-man-dancing-in-a-nightclub-40032-large.mp4"
-        ];
+        // ================= CLOUDINARY MEDIA DATABASE =================
+        const channels = {
+            featured:[
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856943/duet19_r9wyag.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856577/munch16_n9zwcf.mp4"
+            ],
+            duets:[
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856943/duet19_r9wyag.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856867/duet22_etriid.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856940/duet21_seeax3.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856727/duet20_dv5yxm.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856692/duet18_ufz9re.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856835/duet17_twjmqf.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856663/duet16_wqgbjh.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856656/duet15_efyme5.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856335/duet14_kbkj3b.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856654/duet13_fqyegf.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856624/duet12_vqtdcu.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856685/duet11_ws0hlu.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856642/duet9_x42piu.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856217/duet8_y7z0kj.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856600/duet7_ctichu.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856825/duet6_e4bcvh.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856946/duet5_llnphi.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772858770/duet4_xy7bfo.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856926/duet1_xekrbc.mp4" 
+            ],
+            munchtime:[
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856577/munch16_n9zwcf.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856535/munch15_l1u9pw.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856940/munch14_yfykbo.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856937/munch13_izmxzv.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856508/munch12_py2qhz.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856789/munch11_cehftv.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856787/munch10_fuun0d.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856521/munch9_av3pxa.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856474/munch8_cg04mf.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856445/munch7_vccuzr.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856414/munch5_joqhhr.mp4"
+            ]
+        };
 
         const feed = document.getElementById('feed');
+        let observer;
 
-        // GENERATE SLIDES
-        videos.forEach(src => {
-            const slide = document.createElement('section');
-            slide.className = 'slide';
-            slide.innerHTML = `
-                <video src="${src}" loop playsinline muted autoplay></video>
-                <div class="absolute bottom-12 left-0 w-full flex justify-center z-50">
-                    <button onclick="toggleMenu('store')" class="buy-tag">BUY THIS LOOK</button>
-                </div>
-                <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none"></div>
-            `;
-            feed.appendChild(slide);
-        });
+        // LOAD CHANNEL LOGIC
+        function switchChannel(channelName) {
+            // Update UI
+            document.querySelectorAll('.tuner-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-${channelName}`).classList.add('active');
 
-        // INTERSECTION OBSERVER (Auto-play/pause)
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                const video = entry.target.querySelector('video');
-                if (entry.isIntersecting) {
-                    video.play();
-                } else {
-                    video.pause();
-                }
+            // Clear Feed
+            feed.innerHTML = '';
+            if (observer) observer.disconnect();
+
+            // Build Feed
+            // preload="metadata" ensures it loads fast without chewing up the fan's data plan
+            channels[channelName].forEach(src => {
+                const slide = document.createElement('section');
+                slide.className = 'slide';
+                slide.innerHTML = `
+                    <video src="${src}" loop playsinline muted preload="metadata"></video>
+                    <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 pointer-events-none"></div>
+                `;
+                feed.appendChild(slide);
             });
-        }, { threshold: 0.8 });
 
-        document.querySelectorAll('.slide').forEach(s => observer.observe(s));
+            // Re-initialize Auto-play (Intersection Observer)
+            observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const video = entry.target.querySelector('video');
+                    if (entry.isIntersecting) {
+                        video.play().catch(() => {});
+                    } else {
+                        video.pause();
+                        video.currentTime = 0; 
+                    }
+                });
+            }, { threshold: 0.6 });
+
+            document.querySelectorAll('.slide').forEach(s => observer.observe(s));
+            feed.scrollTo(0,0);
+        }
+
+        // INIT
+        switchChannel('featured');
 
         // UI CONTROLS
         function toggleMenu(id) {
@@ -190,11 +263,16 @@
             }
         }
 
-        // TAP TO UNMUTE
+        // GLOBAL TAP TO UNMUTE
+        let isMuted = true;
         document.body.addEventListener('click', (e) => {
             if(e.target.closest('.slide')) {
-                const v = e.target.closest('.slide').querySelector('video');
-                v.muted = !v.muted;
+                const videos = document.querySelectorAll('video');
+                isMuted = !isMuted;
+                videos.forEach(v => v.muted = isMuted);
+                
+                // Hide Toast
+                document.getElementById('unmute-toast').style.opacity = '0';
             }
         });
     </script>
