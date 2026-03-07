@@ -23,7 +23,7 @@
     <style>
         body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; touch-action: pan-y; }
         
-        /* DESKTOP BOXING - Keeps it looking like a phone on big screens */
+        /* DESKTOP BOXING */
         .app-shell {
             width: 100%;
             height: 100dvh;
@@ -116,7 +116,7 @@
 
         <!-- VIDEO FEED -->
         <main id="feed" class="feed">
-            <!-- Videos injected here based on channel -->
+            <!-- Videos injected here dynamically -->
         </main>
 
         <!-- TAP TO UNMUTE TOAST -->
@@ -167,10 +167,10 @@
 
     <script>
         // ================= CLOUDINARY MEDIA DATABASE =================
-        const channels = {
+        const rawChannels = {
             featured:[
-                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856943/duet19_r9wyag.mp4",
-                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856577/munch16_n9zwcf.mp4"
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772865207/9ac2a10c-e3bd-4fa4-b3c1-7ddaaf0afd07_jtslel.mp4",
+                "https://res.cloudinary.com/dj3uocb74/video/upload/v1772865413/e4330852-b73c-4137-ad3b-8f5e9d4a828f_oktni5.mp4"
             ],
             duets:[
                 "https://res.cloudinary.com/dj3uocb74/video/upload/v1772856943/duet19_r9wyag.mp4",
@@ -208,26 +208,39 @@
             ]
         };
 
+        // Randomizer Helper Function
+        const shuffle = (array) => [...array].sort(() => Math.random() - 0.5);
+
         const feed = document.getElementById('feed');
         let observer;
 
-        // LOAD CHANNEL LOGIC
+        // DYNAMIC PLAYLIST ENGINE
         function switchChannel(channelName) {
-            // Update UI
-            document.querySelectorAll('.tuner-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`tab-${channelName}`).classList.add('active');
+            
+            let playlist =[];
 
-            // Clear Feed
+            if (channelName === 'featured') {
+                // FEATURED LOGIC: 2 Randomized Featured Videos + All Randomized Duet Videos
+                playlist =[
+                    ...shuffle(rawChannels.featured).map(url => ({ url, category: 'featured' })),
+                    ...shuffle(rawChannels.duets).map(url => ({ url, category: 'duets' }))
+                ];
+            } else {
+                // NORMAL LOGIC: Just play that specific category (randomized)
+                playlist = shuffle(rawChannels[channelName]).map(url => ({ url, category: channelName }));
+            }
+
+            // Clear Feed & Disconnect Old Observer
             feed.innerHTML = '';
             if (observer) observer.disconnect();
 
-            // Build Feed
-            // preload="metadata" ensures it loads fast without chewing up the fan's data plan
-            channels[channelName].forEach(src => {
+            // Build New Feed
+            playlist.forEach(item => {
                 const slide = document.createElement('section');
                 slide.className = 'slide';
+                slide.setAttribute('data-category', item.category);
                 slide.innerHTML = `
-                    <video src="${src}" loop playsinline muted preload="metadata"></video>
+                    <video src="${item.url}" loop playsinline muted preload="metadata"></video>
                     <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 pointer-events-none"></div>
                 `;
                 feed.appendChild(slide);
@@ -239,6 +252,13 @@
                     const video = entry.target.querySelector('video');
                     if (entry.isIntersecting) {
                         video.play().catch(() => {});
+                        
+                        // HUD INTELLIGENCE: Auto-switch the active tab based on what video is playing
+                        const currentCat = entry.target.getAttribute('data-category');
+                        document.querySelectorAll('.tuner-btn').forEach(btn => btn.classList.remove('active'));
+                        const activeBtn = document.getElementById(`tab-${currentCat}`);
+                        if(activeBtn) activeBtn.classList.add('active');
+
                     } else {
                         video.pause();
                         video.currentTime = 0; 
@@ -250,7 +270,7 @@
             feed.scrollTo(0,0);
         }
 
-        // INIT
+        // INITIAL LOAD
         switchChannel('featured');
 
         // UI CONTROLS
@@ -271,7 +291,7 @@
                 isMuted = !isMuted;
                 videos.forEach(v => v.muted = isMuted);
                 
-                // Hide Toast
+                // Hide Toast Permanently
                 document.getElementById('unmute-toast').style.opacity = '0';
             }
         });
