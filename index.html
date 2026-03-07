@@ -49,14 +49,19 @@
             scroll-snap-stop: always;
             position: relative;
             background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
+        /* VIDEO SIZING FIX - 'contain' centers weird sizes without cropping */
         video {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain; 
             pointer-events: none;
             filter: contrast(1.1) brightness(0.9);
+            background-color: #000;
         }
 
         /* HUD UI Elements */
@@ -85,6 +90,11 @@
             transition: transform 0.4s cubic-bezier(0.85, 0, 0.15, 1);
             background: rgba(0,0,0,0.98);
         }
+
+        /* Clean Scrollbar for the Store Drawer */
+        .store-scroll::-webkit-scrollbar { width: 4px; }
+        .store-scroll::-webkit-scrollbar-track { background: transparent; }
+        .store-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); }
     </style>
 </head>
 <body class="font-brutal antialiased text-white selection:bg-white selection:text-black">
@@ -110,8 +120,7 @@
 
         <!-- THE BRAND (BOTTOM LEFT) -->
         <div class="absolute bottom-10 left-6 z-[100] hud-shadow pointer-events-none">
-            <h1 class="text-4xl italic font-black tracking-tighter leading-none">WH!TE<br>L!E</h1>
-            <p class="text-[8px] uppercase tracking-[0.4em] mt-2 opacity-60">Manifest 2.0</p>
+            <h1 class="text-4xl sm:text-5xl italic font-black tracking-tighter leading-none">WH!TE L!E</h1>
         </div>
 
         <!-- VIDEO FEED -->
@@ -140,25 +149,75 @@
         </div>
 
         <!-- STORE OVERLAY -->
-        <div id="store" class="fixed inset-0 z-[200] overlay-menu translate-x-full p-10 flex flex-col border-l border-white/10">
-            <button onclick="toggleMenu('store')" class="absolute top-10 right-8 text-4xl font-light">✕</button>
-            <h2 class="text-7xl font-black italic tracking-tighter mb-16">STORE</h2>
+        <div id="store" class="fixed inset-0 z-[200] overlay-menu translate-x-full p-8 md:p-10 flex flex-col border-l border-white/10">
+            <button onclick="toggleMenu('store')" class="absolute top-10 right-8 text-4xl font-light z-10">✕</button>
+            <h2 class="text-7xl font-black italic tracking-tighter mb-8 shrink-0">STORE</h2>
             
-            <div class="space-y-12 overflow-y-auto">
+            <div class="flex-1 overflow-y-auto store-scroll pr-4 space-y-12 pb-10">
+                
+                <!-- APPAREL -->
                 <div class="border-b border-white/20 pb-8">
+                    <p class="text-[10px] uppercase tracking-[0.3em] opacity-40 mb-3 font-black">Apparel</p>
                     <p class="text-3xl font-black italic tracking-tighter uppercase mb-1">Hand-Pressed Shirt</p>
-                    <p class="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-6 font-bold">Direct from the Lab</p>
-                    <a href="https://buy.stripe.com/test_link_here" class="inline-block bg-white text-black px-8 py-3 font-black italic text-lg hover:invert transition-all">SECURE ( 45 )</a>
+                    <p class="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-5 font-bold">Direct from the Lab</p>
+                    <a href="https://buy.stripe.com/test_link" class="inline-block bg-white text-black px-8 py-3 font-black italic text-lg hover:invert transition-all">SECURE ( 45 )</a>
                 </div>
 
+                <!-- DISCOGRAPHY / ALBUMS -->
                 <div class="border-b border-white/20 pb-8">
-                    <p class="text-3xl font-black italic tracking-tighter uppercase mb-1">Signed Vision CD</p>
-                    <p class="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-6 font-bold">Physical Media</p>
-                    <a href="https://buy.stripe.com/test_link_here" class="inline-block bg-white text-black px-8 py-3 font-black italic text-lg hover:invert transition-all">SECURE ( 20 )</a>
+                    <p class="text-[10px] uppercase tracking-[0.3em] opacity-40 mb-6 font-black">Discography</p>
+                    
+                    <div class="space-y-8">
+                        <!-- ALBUM 1 -->
+                        <div>
+                            <p class="text-xl font-black italic tracking-tighter uppercase mb-1">Undeniable Underdog <span class="text-[9px] font-sans font-bold tracking-[0.2em] text-white/50 ml-2">(PRE-ORDER)</span></p>
+                            <div class="flex flex-wrap gap-2 mt-3">
+                                <a href="https://buy.stripe.com/test_cd" class="bg-white text-black px-4 py-2 font-black italic text-[10px] uppercase tracking-widest hover:invert transition-all">Physical CD</a>
+                                <a href="https://buy.stripe.com/test_digital" class="border border-white/30 text-white px-4 py-2 font-black italic text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Digital DL</a>
+                            </div>
+                        </div>
+
+                        <!-- ALBUM 2 -->
+                        <div>
+                            <p class="text-xl font-black italic tracking-tighter uppercase mb-1">Definition of Determination</p>
+                            <div class="flex flex-wrap gap-2 mt-3">
+                                <a href="https://buy.stripe.com/test_cd" class="bg-white text-black px-4 py-2 font-black italic text-[10px] uppercase tracking-widest hover:invert transition-all">Physical CD</a>
+                                <a href="https://buy.stripe.com/test_digital" class="border border-white/30 text-white px-4 py-2 font-black italic text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Digital DL</a>
+                            </div>
+                        </div>
+
+                        <!-- ALBUM 3 -->
+                        <div>
+                            <p class="text-xl font-black italic tracking-tighter uppercase mb-1">Comfortably Complicated</p>
+                            <div class="flex flex-wrap gap-2 mt-3">
+                                <a href="https://buy.stripe.com/test_cd" class="bg-white text-black px-4 py-2 font-black italic text-[10px] uppercase tracking-widest hover:invert transition-all">Physical CD</a>
+                                <a href="https://buy.stripe.com/test_digital" class="border border-white/30 text-white px-4 py-2 font-black italic text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Digital DL</a>
+                            </div>
+                        </div>
+
+                        <!-- ALBUM 4 -->
+                        <div>
+                            <p class="text-xl font-black italic tracking-tighter uppercase mb-1">Hustle vs Hunger</p>
+                            <div class="flex flex-wrap gap-2 mt-3">
+                                <a href="https://buy.stripe.com/test_cd" class="bg-white text-black px-4 py-2 font-black italic text-[10px] uppercase tracking-widest hover:invert transition-all">Physical CD</a>
+                                <a href="https://buy.stripe.com/test_digital" class="border border-white/30 text-white px-4 py-2 font-black italic text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Digital DL</a>
+                            </div>
+                        </div>
+
+                        <!-- ALBUM 5 -->
+                        <div>
+                            <p class="text-xl font-black italic tracking-tighter uppercase mb-1">Antisocial Antihero</p>
+                            <div class="flex flex-wrap gap-2 mt-3">
+                                <a href="https://buy.stripe.com/test_cd" class="bg-white text-black px-4 py-2 font-black italic text-[10px] uppercase tracking-widest hover:invert transition-all">Physical CD</a>
+                                <a href="https://buy.stripe.com/test_digital" class="border border-white/30 text-white px-4 py-2 font-black italic text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Digital DL</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
             </div>
             
-            <p class="mt-auto text-[10px] uppercase font-black tracking-[0.3em] text-center border-t border-white/20 pt-6">
+            <p class="shrink-0 mt-4 text-[10px] uppercase font-black tracking-[0.3em] text-center border-t border-white/20 pt-6">
                 Hand-pressed & Shipped by WH!TE L!E
             </p>
         </div>
@@ -208,33 +267,26 @@
             ]
         };
 
-        // Randomizer Helper Function
         const shuffle = (array) => [...array].sort(() => Math.random() - 0.5);
 
         const feed = document.getElementById('feed');
         let observer;
 
-        // DYNAMIC PLAYLIST ENGINE
         function switchChannel(channelName) {
-            
             let playlist =[];
 
             if (channelName === 'featured') {
-                // FEATURED LOGIC: 2 Randomized Featured Videos + All Randomized Duet Videos
                 playlist =[
                     ...shuffle(rawChannels.featured).map(url => ({ url, category: 'featured' })),
                     ...shuffle(rawChannels.duets).map(url => ({ url, category: 'duets' }))
                 ];
             } else {
-                // NORMAL LOGIC: Just play that specific category (randomized)
                 playlist = shuffle(rawChannels[channelName]).map(url => ({ url, category: channelName }));
             }
 
-            // Clear Feed & Disconnect Old Observer
             feed.innerHTML = '';
             if (observer) observer.disconnect();
 
-            // Build New Feed
             playlist.forEach(item => {
                 const slide = document.createElement('section');
                 slide.className = 'slide';
@@ -246,14 +298,12 @@
                 feed.appendChild(slide);
             });
 
-            // Re-initialize Auto-play (Intersection Observer)
             observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     const video = entry.target.querySelector('video');
                     if (entry.isIntersecting) {
                         video.play().catch(() => {});
                         
-                        // HUD INTELLIGENCE: Auto-switch the active tab based on what video is playing
                         const currentCat = entry.target.getAttribute('data-category');
                         document.querySelectorAll('.tuner-btn').forEach(btn => btn.classList.remove('active'));
                         const activeBtn = document.getElementById(`tab-${currentCat}`);
@@ -270,10 +320,8 @@
             feed.scrollTo(0,0);
         }
 
-        // INITIAL LOAD
         switchChannel('featured');
 
-        // UI CONTROLS
         function toggleMenu(id) {
             const menu = document.getElementById(id);
             if (id === 'links') {
@@ -283,7 +331,6 @@
             }
         }
 
-        // GLOBAL TAP TO UNMUTE
         let isMuted = true;
         document.body.addEventListener('click', (e) => {
             if(e.target.closest('.slide')) {
@@ -291,7 +338,6 @@
                 isMuted = !isMuted;
                 videos.forEach(v => v.muted = isMuted);
                 
-                // Hide Toast Permanently
                 document.getElementById('unmute-toast').style.opacity = '0';
             }
         });
