@@ -23,10 +23,17 @@
     <style>
         body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; touch-action: pan-y; }
         
+        /* FILM GRAIN OVERLAY */
+        .noise {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 9999; opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
         /* DESKTOP BOXING */
         .app-shell {
             width: 100%; height: 100dvh; max-width: 500px; margin: 0 auto;
-            position: relative; background: #000; overflow: hidden;
+            position: relative; background: #050505; overflow: hidden;
         }
 
         /* NATIVE VIDEO FEED */
@@ -35,17 +42,13 @@
             scrollbar-width: none; scroll-behavior: smooth; background: #000;
         }
         .feed::-webkit-scrollbar { display: none; }
-
-        /* PERFECT VIDEO CENTERING */
         .slide {
             height: 100%; scroll-snap-align: start; scroll-snap-stop: always;
-            position: relative; background: #000; 
-            display: flex; align-items: center; justify-content: center;
+            position: relative; display: flex; align-items: center; justify-content: center;
         }
         video {
-            width: 100%; height: 100%; max-height: 100dvh;
-            object-fit: contain; margin: 0 auto; pointer-events: none;
-            filter: contrast(1.1) brightness(0.9);
+            width: 100%; height: 100%; object-fit: contain; pointer-events: none;
+            filter: contrast(1.15) brightness(0.9); background: #000;
         }
 
         /* HUD UI */
@@ -54,74 +57,108 @@
             font-size: 11px; font-weight: 900; letter-spacing: 0.2em; text-transform: uppercase;
             opacity: 0.3; transition: all 0.2s; text-align: left;
         }
-        .tuner-btn.active { opacity: 1; text-shadow: 0 0 10px rgba(255,255,255,0.4); }
+        .tuner-btn.active { opacity: 1; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
         .tuner-btn.active::before { content: '■ '; font-size: 8px; vertical-align: middle; margin-right: 4px; }
 
         .overlay-menu {
             transition: transform 0.5s cubic-bezier(0.85, 0, 0.15, 1);
+            background: #000;
         }
 
-        /* ================= WOW FACTOR STORE UI ================= */
+        /* ================= WOW FACTOR: 3D PARALLAX STORE ================= */
         
-        /* Dynamic Ambient Background */
+        /* Vibrant Neon Ambient Glow */
         #store-bg {
-            position: absolute; inset: 0; z-index: 0;
+            position: absolute; inset: -10%; z-index: 0;
             background-size: cover; background-position: center;
-            filter: blur(40px) brightness(0.3);
-            transition: background-image 0.6s ease;
+            filter: blur(15px) brightness(0.5) saturate(1.8);
+            transition: background-image 0.5s ease;
         }
 
         .coverflow-container {
-            scroll-snap-type: x mandatory; scrollbar-width: none;
-            scroll-behavior: smooth; padding: 0 15vw;
+            scroll-snap-type: x mandatory; scrollbar-width: none; 
+            padding: 0 50vw; /* Padding forces center alignment on first/last items */
+            perspective: 1200px;
         }
         .coverflow-container::-webkit-scrollbar { display: none; }
 
-        .album-card {
+        .album-wrapper {
             scroll-snap-align: center;
-            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-            transform: scale(0.8) translateY(20px);
-            opacity: 0.4;
+            width: 70vw; max-w: 300px; 
+            margin: 0 -35vw; /* Overlap logic for tight spacing */
+            padding: 0 4vw; /* Inner spacing */
+            flex-shrink: 0;
+            display: flex; flex-col; items-center; justify-center;
         }
 
-        /* ACTIVE ALBUM STATE (Glow & Float) */
-        .album-card.active-album {
-            transform: scale(1) translateY(0);
-            opacity: 1;
+        /* The 3D Jewel Case Architecture */
+        .album-box {
+            position: relative;
+            width: 100%; aspect-ratio: 1/1;
+            transform-style: preserve-3d;
+            /* Rotation is handled dynamically via Javascript Parallax */
         }
 
-        /* 3D FLIP MECHANICS */
-        .perspective-1000 { perspective: 1000px; }
-        .preserve-3d { transform-style: preserve-3d; }
-        .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-        .rotate-y-180 { transform: rotateY(180deg); }
+        .album-face {
+            position: absolute; inset: 0;
+            backface-visibility: hidden;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: #000;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+        }
 
-        .flip-inner { transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        /* 15px depth creates a 30px thick CD Case */
+        .face-front { transform: translateZ(15px); }
+        .face-back { transform: rotateY(180deg) translateZ(15px); }
         
-        .album-side {
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            transition: box-shadow 0.5s, border 0.5s;
-        }
-        
-        .album-card.active-album .album-side {
-            border: 2px solid rgba(255,255,255,0.8);
-            box-shadow: 0 20px 50px rgba(0,0,0,1), 0 0 30px rgba(255,255,255,0.1);
+        /* The Fake Spine */
+        .face-spine-left {
+            width: 30px; height: 100%;
+            left: 0; top: 0;
+            transform-origin: left;
+            transform: translateX(0) rotateY(-90deg);
+            /* Sleek plastic jewel case gradient */
+            background: linear-gradient(90deg, #111 0%, #3a3a3a 20%, #1a1a1a 80%, #000 100%);
+            border-left: 1px solid rgba(255,255,255,0.3);
+            display: flex; align-items: center; justify-content: center;
         }
 
-        /* Glass Glare Effect */
+        /* Spine Typography */
+        .spine-text {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            font-size: 10px; font-weight: 900; letter-spacing: 2px;
+            color: rgba(255,255,255,0.7); text-transform: uppercase;
+            white-space: nowrap;
+        }
+
         .glass-glare {
             position: absolute; inset: 0; pointer-events: none; z-index: 10;
-            background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 40%);
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 40%);
         }
 
-        .tap-indicator {
-            opacity: 0; transition: opacity 0.4s; pointer-events: none;
+        /* Info & Buttons Fade In */
+        .album-info-box {
+            opacity: 0.3; transform: scale(0.9); transition: all 0.4s ease;
+            height: 120px; display: flex; flex-direction: column; justify-content: space-between;
         }
-        .album-card.active-album .tap-indicator { opacity: 1; }
+        
+        .album-wrapper.active-album .album-info-box {
+            opacity: 1; transform: scale(1);
+        }
+
+        /* Store Background Marquee Text */
+        .store-bg-text {
+            position: absolute; top: 12%; left: -50%; width: 200%;
+            font-size: 14rem; font-style: italic; font-weight: 900; line-height: 0.8;
+            color: rgba(255,255,255,0.04); pointer-events: none; white-space: nowrap; z-index: 0;
+            text-align: center;
+        }
     </style>
 </head>
 <body class="font-brutal antialiased text-white selection:bg-white selection:text-black">
+
+    <div class="noise"></div>
 
     <div class="app-shell">
         
@@ -134,10 +171,10 @@
 
         <!-- THE ACTIONS (BOTTOM RIGHT) -->
         <div class="absolute bottom-10 right-6 z-[100] flex flex-col gap-3 items-end pointer-events-none">
-            <button onclick="toggleMenu('store')" class="bg-white text-black px-6 py-3 text-[11px] font-black uppercase tracking-widest pointer-events-auto hover:invert transition-all shadow-xl">
+            <button onclick="toggleMenu('store')" class="bg-white text-black px-6 py-3 text-[11px] font-black uppercase tracking-widest pointer-events-auto hover:invert transition-all shadow-[0_0_15px_rgba(255,255,255,0.3)]">
                 STORE
             </button>
-            <button onclick="toggleMenu('links')" class="border-2 border-white/50 bg-black/40 backdrop-blur-sm text-white px-6 py-2 text-[11px] font-black uppercase tracking-widest pointer-events-auto hover:bg-white hover:text-black transition-all">
+            <button onclick="toggleMenu('links')" class="border-2 border-white/50 bg-black/40 backdrop-blur-md text-white px-6 py-2 text-[11px] font-black uppercase tracking-widest pointer-events-auto hover:bg-white hover:text-black transition-all">
                 LINKS
             </button>
         </div>
@@ -151,8 +188,8 @@
         <main id="feed" class="feed"></main>
 
         <!-- TAP TO UNMUTE TOAST -->
-        <div id="unmute-toast" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[90] text-[10px] uppercase tracking-[0.5em] opacity-80 pointer-events-none transition-opacity duration-500 bg-white text-black px-5 py-2 rounded-sm shadow-2xl font-black">
-            Tap to Unmute
+        <div id="unmute-toast" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[90] text-[10px] uppercase tracking-[0.5em] opacity-80 pointer-events-none transition-opacity duration-500 bg-white text-black px-6 py-3 font-black rounded-sm shadow-2xl">
+            TAP TO UNMUTE
         </div>
 
         <!-- ================= OVERLAYS ================= -->
@@ -161,40 +198,40 @@
         <div id="links" class="fixed inset-0 z-[200] overlay-menu translate-y-full p-10 flex flex-col justify-center bg-zinc-950">
             <button onclick="toggleMenu('links')" class="absolute top-10 right-8 text-4xl font-light">✕</button>
             <div class="space-y-6 relative z-10">
-                <a href="https://open.spotify.com/artist/6IgPg8MO2tPuQFHcM6MF4o" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:opacity-50 transition-opacity">SPOTIFY</a>
-                <a href="https://music.apple.com/ca/artist/lil-white-lie/1496696984" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:opacity-50 transition-opacity">APPLE MUSIC</a>
-                <a href="https://www.tiktok.com/@whitelie519" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:opacity-50 transition-opacity">TIKTOK</a>
-                <a href="https://www.instagram.com/lilwhitelie519" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:opacity-50 transition-opacity">INSTAGRAM</a>
-                <a href="https://www.youtube.com/@ThaLilWhiteLie" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:opacity-50 transition-opacity">YOUTUBE</a>
+                <a href="https://open.spotify.com/artist/6IgPg8MO2tPuQFHcM6MF4o" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:text-zinc-500 transition-colors">SPOTIFY</a>
+                <a href="https://music.apple.com/ca/artist/lil-white-lie/1496696984" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:text-zinc-500 transition-colors">APPLE MUSIC</a>
+                <a href="https://www.tiktok.com/@whitelie519" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:text-zinc-500 transition-colors">TIKTOK</a>
+                <a href="https://www.instagram.com/lilwhitelie519" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:text-zinc-500 transition-colors">INSTAGRAM</a>
+                <a href="https://www.youtube.com/@ThaLilWhiteLie" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:text-zinc-500 transition-colors">YOUTUBE</a>
             </div>
+            <div class="store-bg-text">CONNECT</div>
         </div>
 
-        <!-- STORE OVERLAY (IMMERSIVE 3D) -->
-        <div id="store" class="fixed inset-0 z-[200] overlay-menu translate-x-full flex flex-col bg-black overflow-hidden">
+        <!-- STORE OVERLAY (3D SCROLL PARALLAX) -->
+        <div id="store" class="fixed inset-0 z-[200] overlay-menu translate-x-full flex flex-col overflow-hidden">
             
-            <!-- Dynamic Ambient Background -->
             <div id="store-bg"></div>
+            <div class="store-bg-text mt-16">DISCOGRAPHY</div>
             
-            <!-- Top Nav -->
             <div class="p-8 flex justify-between items-center shrink-0 relative z-10">
-                <h2 class="text-6xl font-black italic tracking-tighter drop-shadow-lg">STORE</h2>
-                <button onclick="toggleMenu('store')" class="text-4xl font-light drop-shadow-lg">✕</button>
+                <h2 class="text-6xl font-black italic tracking-tighter drop-shadow-xl">STORE</h2>
+                <button onclick="toggleMenu('store')" class="text-4xl font-light drop-shadow-xl">✕</button>
             </div>
             
             <!-- APPAREL BANNER -->
-            <div class="px-8 pb-4 shrink-0 relative z-10">
-                <div class="bg-black/60 backdrop-blur-md border border-white/20 p-4 flex justify-between items-center shadow-2xl">
+            <div class="px-8 pb-2 shrink-0 relative z-10">
+                <div class="bg-black/40 backdrop-blur-xl border border-white/20 p-4 flex justify-between items-center shadow-2xl">
                     <div>
-                        <p class="text-[9px] uppercase tracking-[0.3em] opacity-60 font-black mb-1">Apparel</p>
-                        <p class="text-[14px] font-black italic tracking-tighter uppercase leading-tight">Hand-Pressed<br>Shirt</p>
+                        <p class="text-[9px] uppercase tracking-[0.3em] text-white/50 font-black mb-1">Apparel</p>
+                        <p class="text-[14px] font-black italic tracking-tighter uppercase leading-tight drop-shadow-md">Hand-Pressed<br>Shirt</p>
                     </div>
-                    <a href="#" class="bg-white text-black px-4 py-2 font-black italic text-xs hover:invert transition-all">BUY (45)</a>
+                    <a href="#" class="bg-white text-black px-5 py-2 font-black italic text-xs hover:invert transition-all">BUY (45)</a>
                 </div>
             </div>
 
-            <!-- THE BRUTALIST 3D COVERFLOW -->
-            <div id="coverflow-track" class="coverflow-container flex-1 flex overflow-x-auto items-center gap-12 pb-10 pt-4 relative z-10">
-                <!-- Albums Injected via JS -->
+            <!-- THE 3D COVERFLOW TRACK -->
+            <div id="coverflow-track" class="coverflow-container flex-1 flex overflow-x-auto items-center pt-8 relative z-10">
+                <!-- Albums injected here via JS -->
             </div>
             
             <p class="shrink-0 mt-auto text-[9px] bg-black/80 backdrop-blur-md uppercase font-black tracking-[0.3em] text-center border-t border-white/10 py-5 relative z-20">
@@ -247,8 +284,6 @@
             ]
         };
 
-        // ================= INSTANT LOAD IMAGE DATABASE =================
-        // Injected w_600,q_auto,f_webp to guarantee millisecond loading
         const albums =[
             { 
                 title: "Antisocial Antihero", 
@@ -284,8 +319,7 @@
 
         const shuffle = (array) => [...array].sort(() => Math.random() - 0.5);
         const feed = document.getElementById('feed');
-        let observer;
-
+        
         // ================= CONTINUOUS FEED ENGINE =================
         function buildContinuousFeed() {
             const playlist =[
@@ -325,74 +359,86 @@
             document.querySelectorAll('.slide').forEach(s => feedObserver.observe(s));
         }
 
-        // ================= IMMERSIVE 3D COVERFLOW =================
+        // ================= 3D PARALLAX COVERFLOW =================
         function buildCoverflow() {
             const track = document.getElementById('coverflow-track');
             
             albums.forEach((album) => {
                 const item = document.createElement('div');
-                item.className = 'album-card w-[70vw] max-w-[300px] flex-shrink-0 flex flex-col items-center';
+                item.className = 'album-wrapper flex flex-col items-center';
                 item.setAttribute('data-bg', album.front);
                 
+                // Construct the CSS 3D Box
                 item.innerHTML = `
-                    <div class="relative w-full aspect-square perspective-1000 cursor-pointer mb-6" onclick="flipAlbum(this)">
-                        <div class="flip-inner relative w-full h-full preserve-3d">
-                            <!-- Front Cover -->
-                            <div class="absolute inset-0 backface-hidden album-side bg-zinc-900">
-                                <img src="${album.front}" class="w-full h-full object-cover">
-                                <div class="glass-glare"></div>
-                            </div>
-                            <!-- Back Cover -->
-                            <div class="absolute inset-0 backface-hidden rotate-y-180 album-side bg-zinc-900">
-                                <img src="${album.back}" class="w-full h-full object-cover">
-                                <div class="glass-glare"></div>
-                            </div>
+                    <div class="album-box">
+                        <!-- Front Face -->
+                        <div class="album-face face-front">
+                            <img src="${album.front}" class="w-full h-full object-cover">
+                            <div class="glass-glare"></div>
                         </div>
-                        <div class="tap-indicator absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] uppercase font-black tracking-[0.3em] text-white whitespace-nowrap drop-shadow-md">
-                            <span class="animate-pulse">Tap to Flip ↺</span>
+                        <!-- Fake Spine Face -->
+                        <div class="album-face face-spine-left">
+                            <span class="spine-text">WH!TE L!E - ${album.title}</span>
+                        </div>
+                        <!-- Back Face -->
+                        <div class="album-face face-back">
+                            <img src="${album.back}" class="w-full h-full object-cover">
+                            <div class="glass-glare"></div>
                         </div>
                     </div>
                     
-                    <!-- FIXED HEIGHT TITLE CONTAINER FOR PERFECT BUTTON ALIGNMENT -->
-                    <div class="w-[110%] flex flex-col">
+                    <!-- PERFECTLY ALIGNED TITLES & BUTTONS -->
+                    <div class="album-info-box w-full mt-10 text-center">
                         <div class="h-14 flex items-center justify-center mb-3">
-                            <h3 class="text-xl md:text-2xl font-black italic uppercase text-center leading-tight drop-shadow-md">${album.title}</h3>
+                            <h3 class="text-xl md:text-2xl font-black italic uppercase leading-tight drop-shadow-md px-4">${album.title}</h3>
                         </div>
                         <div class="flex gap-2 justify-center w-full">
-                            <a href="${album.phys}" class="flex-1 bg-white text-black py-3 text-[10px] uppercase tracking-widest font-black italic hover:invert transition-all text-center">PHYSICAL</a>
-                            <a href="${album.digi}" class="flex-1 border-2 border-white/50 text-white py-3 text-[10px] uppercase tracking-widest font-black italic hover:bg-white hover:text-black transition-all text-center bg-black/50 backdrop-blur-sm">DIGITAL</a>
+                            <a href="${album.phys}" class="flex-1 bg-white text-black py-3 text-[10px] uppercase tracking-widest font-black italic hover:invert transition-all text-center shadow-lg">PHYSICAL</a>
+                            <a href="${album.digi}" class="flex-1 border-2 border-white/50 text-white py-3 text-[10px] uppercase tracking-widest font-black italic hover:bg-white hover:text-black transition-all text-center bg-black/40 backdrop-blur-md">DIGITAL</a>
                         </div>
                     </div>
                 `;
                 track.appendChild(item);
             });
 
-            // The Observer that triggers the "Wow Factor" Background Blur Sync
-            const coverObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('active-album');
-                        // Change Ambient Background
-                        const bgImg = entry.target.getAttribute('data-bg');
+            // The Scroll-Linked 3D Engine
+            function updateParallax() {
+                const trackRect = track.getBoundingClientRect();
+                const trackCenter = trackRect.left + trackRect.width / 2;
+                const albumWrappers = document.querySelectorAll('.album-wrapper');
+
+                albumWrappers.forEach(wrapper => {
+                    const rect = wrapper.getBoundingClientRect();
+                    const cardCenter = rect.left + rect.width / 2;
+                    const offset = cardCenter - trackCenter;
+                    
+                    // Math: Calculates how far off center it is, and converts to a rotation degree
+                    const percentage = offset / trackRect.width;
+                    let angle = percentage * -160; 
+                    
+                    // Cap the spin so it doesn't break logic
+                    angle = Math.max(-180, Math.min(180, angle));
+
+                    // Apply the 3D Rotation to the Box
+                    const box = wrapper.querySelector('.album-box');
+                    box.style.transform = `rotateY(${angle}deg)`;
+
+                    // Active State Trigger (For Glow & Background Change)
+                    if (Math.abs(offset) < trackRect.width * 0.25) {
+                        wrapper.classList.add('active-album');
+                        const bgImg = wrapper.getAttribute('data-bg');
                         document.getElementById('store-bg').style.backgroundImage = `url('${bgImg}')`;
                     } else {
-                        entry.target.classList.remove('active-album');
-                        // Auto-Reset 3D Flip
-                        const inner = entry.target.querySelector('.flip-inner');
-                        if(inner && inner.classList.contains('rotate-y-180')) inner.classList.remove('rotate-y-180');
+                        wrapper.classList.remove('active-album');
                     }
                 });
-            }, { root: track, threshold: 0.6 });
-
-            document.querySelectorAll('.album-card').forEach(c => coverObserver.observe(c));
+                requestAnimationFrame(updateParallax);
+            }
+            // Kick off the physics engine
+            requestAnimationFrame(updateParallax);
         }
 
-        function flipAlbum(element) {
-            const inner = element.querySelector('.flip-inner');
-            inner.classList.toggle('rotate-y-180');
-        }
-
-        // ================= INIT & UI CONTROLS =================
+        // ================= INIT & CONTROLS =================
         buildContinuousFeed();
         buildCoverflow();
 
@@ -407,7 +453,6 @@
             else menu.classList.toggle('translate-x-full');
         }
 
-        // GLOBAL TAP TO UNMUTE
         let isMuted = true;
         document.body.addEventListener('click', (e) => {
             if(e.target.closest('.slide')) {
