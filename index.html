@@ -33,13 +33,14 @@
             background: #111;
         }
 
-        /* NATIVE VIDEO FEED */
+        /* NATIVE VIDEO FEED (Continuous) */
         .feed {
             height: 100%;
             scroll-snap-type: y mandatory;
             overflow-y: scroll;
             scrollbar-width: none;
             background: #000;
+            scroll-behavior: smooth;
         }
         .feed::-webkit-scrollbar { display: none; }
 
@@ -54,7 +55,6 @@
             justify-content: center;
         }
 
-        /* VIDEO SIZING FIX - 'contain' centers weird sizes without cropping */
         video {
             width: 100%;
             height: 100%;
@@ -65,9 +65,7 @@
         }
 
         /* HUD UI Elements */
-        .hud-shadow {
-            text-shadow: 0px 2px 10px rgba(0,0,0,0.9), 0px 0px 4px rgba(0,0,0,0.5);
-        }
+        .hud-shadow { text-shadow: 0px 2px 10px rgba(0,0,0,0.9), 0px 0px 4px rgba(0,0,0,0.5); }
 
         .tuner-btn {
             font-size: 11px;
@@ -91,10 +89,57 @@
             background: rgba(0,0,0,0.98);
         }
 
-        /* Clean Scrollbar for the Store Drawer */
-        .store-scroll::-webkit-scrollbar { width: 4px; }
-        .store-scroll::-webkit-scrollbar-track { background: transparent; }
-        .store-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); }
+        /* BRUTALIST COVERFLOW W/ 3D FLIP */
+        .coverflow-container {
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+        }
+        .coverflow-container::-webkit-scrollbar { display: none; }
+
+        .perspective-1000 { perspective: 1000px; }
+        .preserve-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+
+        .album-side {
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            filter: grayscale(100%) brightness(0.5);
+            transform: scale(0.85);
+            border: 2px solid rgba(255,255,255,0.2);
+            background: #000;
+        }
+        
+        .album-info {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .tap-indicator {
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        /* The Active State (Color-Shock) */
+        .cover-item.active-cover .album-side {
+            filter: grayscale(0%) brightness(1.1);
+            transform: scale(1);
+            border: 4px solid white;
+            box-shadow: 10px 10px 0px black, 12px 12px 0px rgba(255,255,255,0.2);
+        }
+        .cover-item.active-cover .album-info {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .cover-item.active-cover .tap-indicator {
+            opacity: 1;
+            animation: pulse-opacity 2s infinite;
+        }
+
+        @keyframes pulse-opacity {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
     </style>
 </head>
 <body class="font-brutal antialiased text-white selection:bg-white selection:text-black">
@@ -103,9 +148,9 @@
         
         <!-- THE TUNER (TOP LEFT) -->
         <nav class="absolute top-10 left-6 z-[100] flex flex-col gap-4 items-start hud-shadow pointer-events-auto">
-            <button onclick="switchChannel('featured')" id="tab-featured" class="tuner-btn active">FEATURED</button>
-            <button onclick="switchChannel('duets')" id="tab-duets" class="tuner-btn">DUETS</button>
-            <button onclick="switchChannel('munchtime')" id="tab-munchtime" class="tuner-btn">MUNCHTIME</button>
+            <button onclick="scrollToCategory('featured')" id="tab-featured" class="tuner-btn active">FEATURED</button>
+            <button onclick="scrollToCategory('duets')" id="tab-duets" class="tuner-btn">DUETS</button>
+            <button onclick="scrollToCategory('munchtime')" id="tab-munchtime" class="tuner-btn">MUNCHTIME</button>
         </nav>
 
         <!-- THE ACTIONS (BOTTOM RIGHT) -->
@@ -123,7 +168,7 @@
             <h1 class="text-4xl sm:text-5xl italic font-black tracking-tighter leading-none">WH!TE L!E</h1>
         </div>
 
-        <!-- VIDEO FEED -->
+        <!-- VIDEO FEED (CONTINUOUS) -->
         <main id="feed" class="feed">
             <!-- Videos injected here dynamically -->
         </main>
@@ -145,79 +190,35 @@
                 <a href="https://www.instagram.com/lilwhitelie519" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:opacity-50 transition-opacity">INSTAGRAM</a>
                 <a href="https://www.youtube.com/@ThaLilWhiteLie" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:opacity-50 transition-opacity">YOUTUBE</a>
             </div>
-            <p class="absolute bottom-10 left-10 text-[9px] uppercase tracking-[0.4em] opacity-30">Connect direct</p>
         </div>
 
-        <!-- STORE OVERLAY -->
-        <div id="store" class="fixed inset-0 z-[200] overlay-menu translate-x-full p-8 md:p-10 flex flex-col border-l border-white/10">
-            <button onclick="toggleMenu('store')" class="absolute top-10 right-8 text-4xl font-light z-10">✕</button>
-            <h2 class="text-7xl font-black italic tracking-tighter mb-8 shrink-0">STORE</h2>
+        <!-- STORE OVERLAY (COVERFLOW) -->
+        <div id="store" class="fixed inset-0 z-[200] overlay-menu translate-x-full flex flex-col bg-zinc-900 border-l border-white/10">
             
-            <div class="flex-1 overflow-y-auto store-scroll pr-4 space-y-12 pb-10">
-                
-                <!-- APPAREL -->
-                <div class="border-b border-white/20 pb-8">
-                    <p class="text-[10px] uppercase tracking-[0.3em] opacity-40 mb-3 font-black">Apparel</p>
-                    <p class="text-3xl font-black italic tracking-tighter uppercase mb-1">Hand-Pressed Shirt</p>
-                    <p class="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-5 font-bold">Direct from the Lab</p>
-                    <a href="https://buy.stripe.com/test_link" class="inline-block bg-white text-black px-8 py-3 font-black italic text-lg hover:invert transition-all">SECURE ( 45 )</a>
-                </div>
-
-                <!-- DISCOGRAPHY / ALBUMS -->
-                <div class="border-b border-white/20 pb-8">
-                    <p class="text-[10px] uppercase tracking-[0.3em] opacity-40 mb-6 font-black">Discography</p>
-                    
-                    <div class="space-y-8">
-                        <!-- ALBUM 1 -->
-                        <div>
-                            <p class="text-xl font-black italic tracking-tighter uppercase mb-1">Undeniable Underdog <span class="text-[9px] font-sans font-bold tracking-[0.2em] text-white/50 ml-2">(PRE-ORDER)</span></p>
-                            <div class="flex flex-wrap gap-2 mt-3">
-                                <a href="https://buy.stripe.com/test_cd" class="bg-white text-black px-4 py-2 font-black italic text-[10px] uppercase tracking-widest hover:invert transition-all">Physical CD</a>
-                                <a href="https://buy.stripe.com/test_digital" class="border border-white/30 text-white px-4 py-2 font-black italic text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Digital DL</a>
-                            </div>
-                        </div>
-
-                        <!-- ALBUM 2 -->
-                        <div>
-                            <p class="text-xl font-black italic tracking-tighter uppercase mb-1">Definition of Determination</p>
-                            <div class="flex flex-wrap gap-2 mt-3">
-                                <a href="https://buy.stripe.com/test_cd" class="bg-white text-black px-4 py-2 font-black italic text-[10px] uppercase tracking-widest hover:invert transition-all">Physical CD</a>
-                                <a href="https://buy.stripe.com/test_digital" class="border border-white/30 text-white px-4 py-2 font-black italic text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Digital DL</a>
-                            </div>
-                        </div>
-
-                        <!-- ALBUM 3 -->
-                        <div>
-                            <p class="text-xl font-black italic tracking-tighter uppercase mb-1">Comfortably Complicated</p>
-                            <div class="flex flex-wrap gap-2 mt-3">
-                                <a href="https://buy.stripe.com/test_cd" class="bg-white text-black px-4 py-2 font-black italic text-[10px] uppercase tracking-widest hover:invert transition-all">Physical CD</a>
-                                <a href="https://buy.stripe.com/test_digital" class="border border-white/30 text-white px-4 py-2 font-black italic text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Digital DL</a>
-                            </div>
-                        </div>
-
-                        <!-- ALBUM 4 -->
-                        <div>
-                            <p class="text-xl font-black italic tracking-tighter uppercase mb-1">Hustle vs Hunger</p>
-                            <div class="flex flex-wrap gap-2 mt-3">
-                                <a href="https://buy.stripe.com/test_cd" class="bg-white text-black px-4 py-2 font-black italic text-[10px] uppercase tracking-widest hover:invert transition-all">Physical CD</a>
-                                <a href="https://buy.stripe.com/test_digital" class="border border-white/30 text-white px-4 py-2 font-black italic text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Digital DL</a>
-                            </div>
-                        </div>
-
-                        <!-- ALBUM 5 -->
-                        <div>
-                            <p class="text-xl font-black italic tracking-tighter uppercase mb-1">Antisocial Antihero</p>
-                            <div class="flex flex-wrap gap-2 mt-3">
-                                <a href="https://buy.stripe.com/test_cd" class="bg-white text-black px-4 py-2 font-black italic text-[10px] uppercase tracking-widest hover:invert transition-all">Physical CD</a>
-                                <a href="https://buy.stripe.com/test_digital" class="border border-white/30 text-white px-4 py-2 font-black italic text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Digital DL</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+            <div class="p-8 flex justify-between items-center shrink-0">
+                <h2 class="text-6xl font-black italic tracking-tighter">STORE</h2>
+                <button onclick="toggleMenu('store')" class="text-4xl font-light">✕</button>
             </div>
             
-            <p class="shrink-0 mt-4 text-[10px] uppercase font-black tracking-[0.3em] text-center border-t border-white/20 pt-6">
+            <!-- APPAREL BANNER -->
+            <div class="px-8 pb-2 shrink-0">
+                <div class="bg-black border-2 border-white p-4 flex justify-between items-center">
+                    <div>
+                        <p class="text-[9px] uppercase tracking-[0.3em] opacity-60 font-black mb-1">Apparel</p>
+                        <p class="text-[14px] font-black italic tracking-tighter uppercase leading-tight">Hand-Pressed<br>Shirt</p>
+                    </div>
+                    <a href="https://buy.stripe.com/test_link" class="bg-white text-black px-4 py-2 font-black italic text-sm hover:invert transition-all">BUY (45)</a>
+                </div>
+            </div>
+
+            <p class="px-8 pt-6 pb-2 text-[10px] uppercase tracking-[0.3em] opacity-40 font-black">Discography</p>
+
+            <!-- THE BRUTALIST COVERFLOW W/ FLIP -->
+            <div id="coverflow-track" class="coverflow-container flex-1 flex overflow-x-auto items-center px-[15vw] gap-10 pb-10 pt-4">
+                <!-- Albums injected here via JS -->
+            </div>
+            
+            <p class="shrink-0 mt-auto text-[9px] bg-black uppercase font-black tracking-[0.3em] text-center border-t border-white/20 py-4">
                 Hand-pressed & Shipped by WH!TE L!E
             </p>
         </div>
@@ -267,29 +268,56 @@
             ]
         };
 
-        const shuffle = (array) => [...array].sort(() => Math.random() - 0.5);
+        // ================= ALBUM DATABASE (CHRONOLOGICAL) =================
+        const albums =[
+            { 
+                title: "Antisocial Antihero", 
+                front: "https://res.cloudinary.com/dj3uocb74/image/upload/v1773186502/1_bbscj6.png", 
+                back: "https://res.cloudinary.com/dj3uocb74/image/upload/v1773186501/7_wurki1.png", 
+                phys: "#", digi: "#" 
+            },
+            { 
+                title: "Hustle vs Hunger", 
+                front: "https://res.cloudinary.com/dj3uocb74/image/upload/v1773186230/20220525_175420_0000_fxxpae.png", 
+                back: "https://res.cloudinary.com/dj3uocb74/image/upload/v1773186245/20220525_210420_0000_serjc7.png", 
+                phys: "#", digi: "#" 
+            },
+            { 
+                title: "Comfortably Complicated", 
+                front: "https://res.cloudinary.com/dj3uocb74/image/upload/v1773186419/Final_Comfortably_Complicated_gluzu0.png", 
+                back: "https://res.cloudinary.com/dj3uocb74/image/upload/v1773186445/back_cover_fdod6b.png", 
+                phys: "#", digi: "#" 
+            },
+            { 
+                title: "Lost In Love", 
+                front: "https://res.cloudinary.com/dj3uocb74/image/upload/v1773187056/Lost_In_Love_PA_f1xokm.png", 
+                back: "https://res.cloudinary.com/dj3uocb74/image/upload/v1773186561/lost_in_love_back_hjew14.png", 
+                phys: "#", digi: "#" 
+            },
+            { 
+                title: "Definition of Determination", 
+                front: "https://res.cloudinary.com/dj3uocb74/image/upload/v1773186739/DOD_d1bytt.png", 
+                back: "https://res.cloudinary.com/dj3uocb74/image/upload/v1773186991/dod_back_cover_jsjjoo.png", 
+                phys: "#", digi: "#" 
+            }
+        ];
 
+        const shuffle = (array) => [...array].sort(() => Math.random() - 0.5);
         const feed = document.getElementById('feed');
         let observer;
 
-        function switchChannel(channelName) {
-            let playlist =[];
+        // ================= BUILD CONTINUOUS FEED =================
+        function buildContinuousFeed() {
+            const playlist =[
+                ...rawChannels.featured.map(url => ({ url, category: 'featured' })),
+                ...shuffle(rawChannels.duets).map(url => ({ url, category: 'duets' })),
+                ...shuffle(rawChannels.munchtime).map(url => ({ url, category: 'munchtime' }))
+            ];
 
-            if (channelName === 'featured') {
-                playlist =[
-                    ...shuffle(rawChannels.featured).map(url => ({ url, category: 'featured' })),
-                    ...shuffle(rawChannels.duets).map(url => ({ url, category: 'duets' }))
-                ];
-            } else {
-                playlist = shuffle(rawChannels[channelName]).map(url => ({ url, category: channelName }));
-            }
-
-            feed.innerHTML = '';
-            if (observer) observer.disconnect();
-
-            playlist.forEach(item => {
+            playlist.forEach((item, index) => {
                 const slide = document.createElement('section');
                 slide.className = 'slide';
+                slide.id = `video-${index}`;
                 slide.setAttribute('data-category', item.category);
                 slide.innerHTML = `
                     <video src="${item.url}" loop playsinline muted preload="metadata"></video>
@@ -298,17 +326,16 @@
                 feed.appendChild(slide);
             });
 
-            observer = new IntersectionObserver((entries) => {
+            const feedObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     const video = entry.target.querySelector('video');
+                    const currentCat = entry.target.getAttribute('data-category');
+
                     if (entry.isIntersecting) {
                         video.play().catch(() => {});
-                        
-                        const currentCat = entry.target.getAttribute('data-category');
                         document.querySelectorAll('.tuner-btn').forEach(btn => btn.classList.remove('active'));
                         const activeBtn = document.getElementById(`tab-${currentCat}`);
                         if(activeBtn) activeBtn.classList.add('active');
-
                     } else {
                         video.pause();
                         video.currentTime = 0; 
@@ -316,12 +343,82 @@
                 });
             }, { threshold: 0.6 });
 
-            document.querySelectorAll('.slide').forEach(s => observer.observe(s));
-            feed.scrollTo(0,0);
+            document.querySelectorAll('.slide').forEach(s => feedObserver.observe(s));
         }
 
-        switchChannel('featured');
+        // ================= BUILD BRUTALIST COVERFLOW W/ 3D FLIP =================
+        function buildCoverflow() {
+            const track = document.getElementById('coverflow-track');
+            
+            albums.forEach((album, index) => {
+                const item = document.createElement('div');
+                item.className = 'cover-item snap-center shrink-0 w-[72vw] max-w-[320px] flex flex-col items-center';
+                
+                // The 3D flip card structure
+                item.innerHTML = `
+                    <div class="relative w-full aspect-square perspective-1000 cursor-pointer" onclick="flipAlbum(this)">
+                        <div class="flip-inner relative w-full h-full transition-transform duration-700 preserve-3d">
+                            <!-- Front Cover -->
+                            <div class="absolute inset-0 backface-hidden album-side">
+                                <img src="${album.front}" class="w-full h-full object-cover">
+                            </div>
+                            <!-- Back Cover (Tracklist) -->
+                            <div class="absolute inset-0 backface-hidden rotate-y-180 album-side">
+                                <img src="${album.back}" class="w-full h-full object-cover">
+                            </div>
+                        </div>
+                        <div class="tap-indicator absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] uppercase font-black tracking-[0.3em] text-white">
+                            Tap to Flip ↺
+                        </div>
+                    </div>
+                    
+                    <div class="album-info w-full mt-10 text-center">
+                        <h3 class="text-xl md:text-2xl font-black italic uppercase leading-none mb-4">${album.title}</h3>
+                        <div class="flex gap-2 justify-center w-full">
+                            <a href="${album.phys}" class="flex-1 bg-white text-black py-3 text-[10px] uppercase tracking-widest font-black italic hover:invert transition-all">PHYSICAL CD</a>
+                            <a href="${album.digi}" class="flex-1 border-2 border-white/50 text-white py-3 text-[10px] uppercase tracking-widest font-black italic hover:bg-white hover:text-black transition-all">DIGITAL DL</a>
+                        </div>
+                    </div>
+                `;
+                track.appendChild(item);
+            });
 
+            // Intersection Observer for the Color-Shock effect
+            const coverObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active-cover');
+                    } else {
+                        entry.target.classList.remove('active-cover');
+                        // Reset flip when swiped away
+                        const inner = entry.target.querySelector('.flip-inner');
+                        if(inner.classList.contains('rotate-y-180')) inner.classList.remove('rotate-y-180');
+                    }
+                });
+            }, { root: track, threshold: 0.7 });
+
+            document.querySelectorAll('.cover-item').forEach(c => coverObserver.observe(c));
+        }
+
+        // Helper function for the 3D click flip
+        function flipAlbum(element) {
+            const inner = element.querySelector('.flip-inner');
+            inner.classList.toggle('rotate-y-180');
+        }
+
+        // ================= APP INITIALIZATION =================
+        buildContinuousFeed();
+        buildCoverflow();
+
+        // HUD ELEVATOR LOGIC
+        function scrollToCategory(cat) {
+            const targetSlide = document.querySelector(`.slide[data-category="${cat}"]`);
+            if(targetSlide) {
+                targetSlide.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // MENU TOGGLES
         function toggleMenu(id) {
             const menu = document.getElementById(id);
             if (id === 'links') {
@@ -331,13 +428,13 @@
             }
         }
 
+        // GLOBAL TAP TO UNMUTE
         let isMuted = true;
         document.body.addEventListener('click', (e) => {
             if(e.target.closest('.slide')) {
                 const videos = document.querySelectorAll('video');
                 isMuted = !isMuted;
                 videos.forEach(v => v.muted = isMuted);
-                
                 document.getElementById('unmute-toast').style.opacity = '0';
             }
         });
