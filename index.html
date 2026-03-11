@@ -23,126 +23,103 @@
     <style>
         body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; touch-action: pan-y; }
         
+        /* FILM GRAIN OVERLAY */
+        .noise {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 9999; opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
         /* DESKTOP BOXING */
         .app-shell {
-            width: 100%;
-            height: 100dvh;
-            max-width: 500px;
-            margin: 0 auto;
-            position: relative;
-            background: #111;
+            width: 100%; height: 100dvh; max-width: 500px; margin: 0 auto;
+            position: relative; background: #050505;
         }
 
-        /* NATIVE VIDEO FEED (Continuous) */
+        /* NATIVE VIDEO FEED */
         .feed {
-            height: 100%;
-            scroll-snap-type: y mandatory;
-            overflow-y: scroll;
-            scrollbar-width: none;
-            background: #000;
-            scroll-behavior: smooth;
+            height: 100%; scroll-snap-type: y mandatory; overflow-y: scroll;
+            scrollbar-width: none; scroll-behavior: smooth;
         }
         .feed::-webkit-scrollbar { display: none; }
-
         .slide {
-            height: 100%;
-            scroll-snap-align: start;
-            scroll-snap-stop: always;
-            position: relative;
-            background: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            height: 100%; scroll-snap-align: start; scroll-snap-stop: always;
+            position: relative; background: #000; display: flex; align-items: center; justify-content: center;
         }
-
         video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain; 
-            pointer-events: none;
-            filter: contrast(1.1) brightness(0.9);
-            background-color: #000;
+            width: 100%; height: 100%; object-fit: contain; pointer-events: none;
+            filter: contrast(1.15) brightness(0.9);
         }
 
-        /* HUD UI Elements */
+        /* HUD UI */
         .hud-shadow { text-shadow: 0px 2px 10px rgba(0,0,0,0.9), 0px 0px 4px rgba(0,0,0,0.5); }
-
         .tuner-btn {
-            font-size: 11px;
-            font-weight: 900;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            opacity: 0.3;
-            transition: all 0.2s;
-            text-align: left;
+            font-size: 11px; font-weight: 900; letter-spacing: 0.2em; text-transform: uppercase;
+            opacity: 0.3; transition: all 0.2s; text-align: left;
         }
-        .tuner-btn.active { opacity: 1; }
-        .tuner-btn.active::before {
-            content: '■ ';
-            font-size: 8px;
-            vertical-align: middle;
-            margin-right: 4px;
-        }
+        .tuner-btn.active { opacity: 1; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        .tuner-btn.active::before { content: '■ '; font-size: 8px; vertical-align: middle; margin-right: 4px; }
 
         .overlay-menu {
-            transition: transform 0.4s cubic-bezier(0.85, 0, 0.15, 1);
-            background: rgba(0,0,0,0.98);
+            transition: transform 0.5s cubic-bezier(0.85, 0, 0.15, 1);
+            background: #000;
         }
 
-        /* BRUTALIST COVERFLOW W/ 3D FLIP */
+        /* STORE: THE EXPLODED VIEW COVERFLOW */
         .coverflow-container {
-            scroll-snap-type: x mandatory;
-            scrollbar-width: none;
+            scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 2rem;
         }
         .coverflow-container::-webkit-scrollbar { display: none; }
 
-        .perspective-1000 { perspective: 1000px; }
-        .preserve-3d { transform-style: preserve-3d; }
-        .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-        .rotate-y-180 { transform: rotateY(180deg); }
+        .album-wrapper {
+            position: relative; width: 100%; aspect-ratio: 1/1.1;
+            display: flex; align-items: center; justify-content: center;
+        }
 
-        .album-side {
-            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-            filter: grayscale(100%) brightness(0.5);
-            transform: scale(0.85);
-            border: 2px solid rgba(255,255,255,0.2);
-            background: #000;
+        .cover-front, .cover-back {
+            position: absolute; width: 85%; aspect-ratio: 1/1;
+            object-fit: cover; transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid rgba(255,255,255,0.1); filter: grayscale(100%) opacity(0.3);
         }
         
-        .album-info {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        .cover-back { z-index: 1; }
+        .cover-front { z-index: 2; }
+
+        .album-info-box {
+            opacity: 0; transform: translateY(10px); transition: all 0.5s ease 0.2s;
+            height: 120px; /* FIXED HEIGHT FOR PERFECT ALIGNMENT */
+            display: flex; flex-direction: column; justify-content: space-between;
         }
 
-        .tap-indicator {
-            opacity: 0;
-            transition: opacity 0.4s;
+        /* THE WOW FACTOR: ACTIVE STATE UNBOXING */
+        .cover-item.active-cover .cover-back {
+            filter: grayscale(0%) opacity(1);
+            transform: translate(15%, 15%) scale(0.95);
+            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: 20px 20px 30px rgba(0,0,0,0.9);
         }
-
-        /* The Active State (Color-Shock) */
-        .cover-item.active-cover .album-side {
-            filter: grayscale(0%) brightness(1.1);
-            transform: scale(1);
+        
+        .cover-item.active-cover .cover-front {
+            filter: grayscale(0%) opacity(1);
+            transform: translate(-15%, -15%) scale(1.05);
             border: 4px solid white;
-            box-shadow: 10px 10px 0px black, 12px 12px 0px rgba(255,255,255,0.2);
-        }
-        .cover-item.active-cover .album-info {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .cover-item.active-cover .tap-indicator {
-            opacity: 1;
-            animation: pulse-opacity 2s infinite;
+            box-shadow: -15px -15px 40px rgba(0,0,0,0.8), 0 0 20px rgba(255,255,255,0.1);
         }
 
-        @keyframes pulse-opacity {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 1; }
+        .cover-item.active-cover .album-info-box { opacity: 1; transform: translateY(0); }
+
+        /* Store Background Marquee Text */
+        .store-bg-text {
+            position: absolute; top: 10%; left: -50%; width: 200%;
+            font-size: 15rem; font-style: italic; font-weight: 900; line-height: 0.8;
+            color: rgba(255,255,255,0.03); pointer-events: none; white-space: nowrap; z-index: 0;
+            text-align: center;
         }
     </style>
 </head>
 <body class="font-brutal antialiased text-white selection:bg-white selection:text-black">
+
+    <div class="noise"></div> <!-- Cinematic Grain -->
 
     <div class="app-shell">
         
@@ -155,10 +132,10 @@
 
         <!-- THE ACTIONS (BOTTOM RIGHT) -->
         <div class="absolute bottom-10 right-6 z-[100] flex flex-col gap-3 items-end pointer-events-none">
-            <button onclick="toggleMenu('store')" class="bg-white text-black px-6 py-3 text-[11px] font-black uppercase tracking-widest pointer-events-auto hover:invert transition-all">
+            <button onclick="toggleMenu('store')" class="bg-white text-black px-6 py-3 text-[11px] font-black uppercase tracking-widest pointer-events-auto hover:invert transition-all shadow-[0_0_15px_rgba(255,255,255,0.3)]">
                 STORE
             </button>
-            <button onclick="toggleMenu('links')" class="border-2 border-white/50 bg-black/20 backdrop-blur-sm text-white px-6 py-2 text-[11px] font-black uppercase tracking-widest pointer-events-auto hover:bg-white hover:text-black transition-all">
+            <button onclick="toggleMenu('links')" class="border-2 border-white/50 bg-black/40 backdrop-blur-md text-white px-6 py-2 text-[11px] font-black uppercase tracking-widest pointer-events-auto hover:bg-white hover:text-black transition-all">
                 LINKS
             </button>
         </div>
@@ -168,14 +145,12 @@
             <h1 class="text-4xl sm:text-5xl italic font-black tracking-tighter leading-none">WH!TE L!E</h1>
         </div>
 
-        <!-- VIDEO FEED (CONTINUOUS) -->
-        <main id="feed" class="feed">
-            <!-- Videos injected here dynamically -->
-        </main>
+        <!-- VIDEO FEED -->
+        <main id="feed" class="feed"></main>
 
         <!-- TAP TO UNMUTE TOAST -->
-        <div id="unmute-toast" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[90] text-[10px] uppercase tracking-[0.5em] opacity-60 pointer-events-none transition-opacity duration-500 bg-black/50 px-4 py-2 rounded-full backdrop-blur-md">
-            Tap to Unmute
+        <div id="unmute-toast" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[90] text-[10px] uppercase tracking-[0.5em] opacity-80 pointer-events-none transition-opacity duration-500 bg-white text-black px-6 py-3 font-black rounded-sm shadow-2xl">
+            TAP TO UNMUTE
         </div>
 
         <!-- ================= OVERLAYS ================= -->
@@ -183,42 +158,42 @@
         <!-- LINKS OVERLAY -->
         <div id="links" class="fixed inset-0 z-[200] overlay-menu translate-y-full p-10 flex flex-col justify-center">
             <button onclick="toggleMenu('links')" class="absolute top-10 right-8 text-4xl font-light">✕</button>
-            <div class="space-y-6">
-                <a href="https://open.spotify.com/artist/6IgPg8MO2tPuQFHcM6MF4o" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:opacity-50 transition-opacity">SPOTIFY</a>
-                <a href="https://music.apple.com/ca/artist/lil-white-lie/1496696984" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:opacity-50 transition-opacity">APPLE MUSIC</a>
-                <a href="https://www.tiktok.com/@whitelie519" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:opacity-50 transition-opacity">TIKTOK</a>
-                <a href="https://www.instagram.com/lilwhitelie519" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:opacity-50 transition-opacity">INSTAGRAM</a>
-                <a href="https://www.youtube.com/@ThaLilWhiteLie" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:opacity-50 transition-opacity">YOUTUBE</a>
+            <div class="space-y-6 relative z-10">
+                <a href="https://open.spotify.com/artist/6IgPg8MO2tPuQFHcM6MF4o" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:text-zinc-500 transition-colors">SPOTIFY</a>
+                <a href="https://music.apple.com/ca/artist/lil-white-lie/1496696984" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:text-zinc-500 transition-colors">APPLE MUSIC</a>
+                <a href="https://www.tiktok.com/@whitelie519" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:text-zinc-500 transition-colors">TIKTOK</a>
+                <a href="https://www.instagram.com/lilwhitelie519" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:text-zinc-500 transition-colors">INSTAGRAM</a>
+                <a href="https://www.youtube.com/@ThaLilWhiteLie" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:text-zinc-500 transition-colors">YOUTUBE</a>
             </div>
+            <div class="store-bg-text">CONNECT</div>
         </div>
 
-        <!-- STORE OVERLAY (COVERFLOW) -->
-        <div id="store" class="fixed inset-0 z-[200] overlay-menu translate-x-full flex flex-col bg-zinc-900 border-l border-white/10">
+        <!-- STORE OVERLAY (EXPLODED VIEW) -->
+        <div id="store" class="fixed inset-0 z-[200] overlay-menu translate-x-full flex flex-col border-l border-white/10">
+            <div class="store-bg-text mt-20">DISCOGRAPHY</div>
             
-            <div class="p-8 flex justify-between items-center shrink-0">
+            <div class="p-8 flex justify-between items-center shrink-0 relative z-10">
                 <h2 class="text-6xl font-black italic tracking-tighter">STORE</h2>
                 <button onclick="toggleMenu('store')" class="text-4xl font-light">✕</button>
             </div>
             
             <!-- APPAREL BANNER -->
-            <div class="px-8 pb-2 shrink-0">
-                <div class="bg-black border-2 border-white p-4 flex justify-between items-center">
+            <div class="px-8 pb-4 shrink-0 relative z-10">
+                <div class="bg-black/80 backdrop-blur-md border border-white/30 p-4 flex justify-between items-center shadow-2xl">
                     <div>
-                        <p class="text-[9px] uppercase tracking-[0.3em] opacity-60 font-black mb-1">Apparel</p>
+                        <p class="text-[9px] uppercase tracking-[0.3em] text-white/50 font-black mb-1">Apparel</p>
                         <p class="text-[14px] font-black italic tracking-tighter uppercase leading-tight">Hand-Pressed<br>Shirt</p>
                     </div>
-                    <a href="https://buy.stripe.com/test_link" class="bg-white text-black px-4 py-2 font-black italic text-sm hover:invert transition-all">BUY (45)</a>
+                    <a href="#" class="bg-white text-black px-5 py-2 font-black italic text-xs hover:invert transition-all">BUY (45)</a>
                 </div>
             </div>
 
-            <p class="px-8 pt-6 pb-2 text-[10px] uppercase tracking-[0.3em] opacity-40 font-black">Discography</p>
-
-            <!-- THE BRUTALIST COVERFLOW W/ FLIP -->
-            <div id="coverflow-track" class="coverflow-container flex-1 flex overflow-x-auto items-center px-[15vw] gap-10 pb-10 pt-4">
+            <!-- THE EXPLODED COVERFLOW -->
+            <div id="coverflow-track" class="coverflow-container flex-1 flex overflow-x-auto items-center px-[15vw] gap-12 pt-8 relative z-10">
                 <!-- Albums injected here via JS -->
             </div>
             
-            <p class="shrink-0 mt-auto text-[9px] bg-black uppercase font-black tracking-[0.3em] text-center border-t border-white/20 py-4">
+            <p class="shrink-0 mt-auto text-[9px] bg-black uppercase font-black tracking-[0.3em] text-center border-t border-white/10 py-5 relative z-10">
                 Hand-pressed & Shipped by WH!TE L!E
             </p>
         </div>
@@ -268,36 +243,37 @@
             ]
         };
 
-        // ================= ALBUM DATABASE (CHRONOLOGICAL) =================
+        // ================= FAST-LOADING IMAGE DATABASE =================
+        // Added 'w_800,q_auto,f_auto' to force Cloudinary to compress and load images instantly
         const albums =[
             { 
                 title: "Antisocial Antihero", 
-                front: "https://res.cloudinary.com/dj3uocb74/image/upload/v1773186502/1_bbscj6.png", 
-                back: "https://res.cloudinary.com/dj3uocb74/image/upload/v1773186501/7_wurki1.png", 
+                front: "https://res.cloudinary.com/dj3uocb74/image/upload/w_800,q_auto,f_auto/v1773186502/1_bbscj6.png", 
+                back: "https://res.cloudinary.com/dj3uocb74/image/upload/w_800,q_auto,f_auto/v1773186501/7_wurki1.png", 
                 phys: "#", digi: "#" 
             },
             { 
                 title: "Hustle vs Hunger", 
-                front: "https://res.cloudinary.com/dj3uocb74/image/upload/v1773186230/20220525_175420_0000_fxxpae.png", 
-                back: "https://res.cloudinary.com/dj3uocb74/image/upload/v1773186245/20220525_210420_0000_serjc7.png", 
+                front: "https://res.cloudinary.com/dj3uocb74/image/upload/w_800,q_auto,f_auto/v1773186230/20220525_175420_0000_fxxpae.png", 
+                back: "https://res.cloudinary.com/dj3uocb74/image/upload/w_800,q_auto,f_auto/v1773186245/20220525_210420_0000_serjc7.png", 
                 phys: "#", digi: "#" 
             },
             { 
                 title: "Comfortably Complicated", 
-                front: "https://res.cloudinary.com/dj3uocb74/image/upload/v1773186419/Final_Comfortably_Complicated_gluzu0.png", 
-                back: "https://res.cloudinary.com/dj3uocb74/image/upload/v1773186445/back_cover_fdod6b.png", 
+                front: "https://res.cloudinary.com/dj3uocb74/image/upload/w_800,q_auto,f_auto/v1773186419/Final_Comfortably_Complicated_gluzu0.png", 
+                back: "https://res.cloudinary.com/dj3uocb74/image/upload/w_800,q_auto,f_auto/v1773186445/back_cover_fdod6b.png", 
                 phys: "#", digi: "#" 
             },
             { 
                 title: "Lost In Love", 
-                front: "https://res.cloudinary.com/dj3uocb74/image/upload/v1773187056/Lost_In_Love_PA_f1xokm.png", 
-                back: "https://res.cloudinary.com/dj3uocb74/image/upload/v1773186561/lost_in_love_back_hjew14.png", 
+                front: "https://res.cloudinary.com/dj3uocb74/image/upload/w_800,q_auto,f_auto/v1773187056/Lost_In_Love_PA_f1xokm.png", 
+                back: "https://res.cloudinary.com/dj3uocb74/image/upload/w_800,q_auto,f_auto/v1773186561/lost_in_love_back_hjew14.png", 
                 phys: "#", digi: "#" 
             },
             { 
                 title: "Definition of Determination", 
-                front: "https://res.cloudinary.com/dj3uocb74/image/upload/v1773186739/DOD_d1bytt.png", 
-                back: "https://res.cloudinary.com/dj3uocb74/image/upload/v1773186991/dod_back_cover_jsjjoo.png", 
+                front: "https://res.cloudinary.com/dj3uocb74/image/upload/w_800,q_auto,f_auto/v1773186739/DOD_d1bytt.png", 
+                back: "https://res.cloudinary.com/dj3uocb74/image/upload/w_800,q_auto,f_auto/v1773186991/dod_back_cover_jsjjoo.png", 
                 phys: "#", digi: "#" 
             }
         ];
@@ -317,7 +293,6 @@
             playlist.forEach((item, index) => {
                 const slide = document.createElement('section');
                 slide.className = 'slide';
-                slide.id = `video-${index}`;
                 slide.setAttribute('data-category', item.category);
                 slide.innerHTML = `
                     <video src="${item.url}" loop playsinline muted preload="metadata"></video>
@@ -346,53 +321,37 @@
             document.querySelectorAll('.slide').forEach(s => feedObserver.observe(s));
         }
 
-        // ================= BUILD BRUTALIST COVERFLOW W/ 3D FLIP =================
+        // ================= BUILD EXPLODED COVERFLOW =================
         function buildCoverflow() {
             const track = document.getElementById('coverflow-track');
             
-            albums.forEach((album, index) => {
+            albums.forEach((album) => {
                 const item = document.createElement('div');
-                item.className = 'cover-item snap-center shrink-0 w-[72vw] max-w-[320px] flex flex-col items-center';
+                item.className = 'cover-item snap-center shrink-0 w-[70vw] max-w-[320px] flex flex-col items-center';
                 
-                // The 3D flip card structure
                 item.innerHTML = `
-                    <div class="relative w-full aspect-square perspective-1000 cursor-pointer" onclick="flipAlbum(this)">
-                        <div class="flip-inner relative w-full h-full transition-transform duration-700 preserve-3d">
-                            <!-- Front Cover -->
-                            <div class="absolute inset-0 backface-hidden album-side">
-                                <img src="${album.front}" class="w-full h-full object-cover">
-                            </div>
-                            <!-- Back Cover (Tracklist) -->
-                            <div class="absolute inset-0 backface-hidden rotate-y-180 album-side">
-                                <img src="${album.back}" class="w-full h-full object-cover">
-                            </div>
-                        </div>
-                        <div class="tap-indicator absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] uppercase font-black tracking-[0.3em] text-white">
-                            Tap to Flip ↺
-                        </div>
+                    <div class="album-wrapper">
+                        <img src="${album.back}" class="cover-back">
+                        <img src="${album.front}" class="cover-front">
                     </div>
                     
-                    <div class="album-info w-full mt-10 text-center">
-                        <h3 class="text-xl md:text-2xl font-black italic uppercase leading-none mb-4">${album.title}</h3>
-                        <div class="flex gap-2 justify-center w-full">
-                            <a href="${album.phys}" class="flex-1 bg-white text-black py-3 text-[10px] uppercase tracking-widest font-black italic hover:invert transition-all">PHYSICAL CD</a>
-                            <a href="${album.digi}" class="flex-1 border-2 border-white/50 text-white py-3 text-[10px] uppercase tracking-widest font-black italic hover:bg-white hover:text-black transition-all">DIGITAL DL</a>
+                    <div class="album-info-box w-[110%] mt-8 text-center">
+                        <h3 class="text-xl md:text-2xl font-black italic uppercase leading-tight line-clamp-2">${album.title}</h3>
+                        <div class="flex gap-2 justify-center w-full mt-auto">
+                            <a href="${album.phys}" class="flex-1 bg-white text-black py-3 text-[10px] uppercase tracking-widest font-black italic hover:bg-zinc-300 transition-colors shadow-lg">PHYSICAL CD</a>
+                            <a href="${album.digi}" class="flex-1 border-2 border-white/50 text-white py-3 text-[10px] uppercase tracking-widest font-black italic hover:bg-white hover:text-black transition-colors">DIGITAL DL</a>
                         </div>
                     </div>
                 `;
                 track.appendChild(item);
             });
 
-            // Intersection Observer for the Color-Shock effect
             const coverObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('active-cover');
                     } else {
                         entry.target.classList.remove('active-cover');
-                        // Reset flip when swiped away
-                        const inner = entry.target.querySelector('.flip-inner');
-                        if(inner.classList.contains('rotate-y-180')) inner.classList.remove('rotate-y-180');
                     }
                 });
             }, { root: track, threshold: 0.7 });
@@ -400,35 +359,21 @@
             document.querySelectorAll('.cover-item').forEach(c => coverObserver.observe(c));
         }
 
-        // Helper function for the 3D click flip
-        function flipAlbum(element) {
-            const inner = element.querySelector('.flip-inner');
-            inner.classList.toggle('rotate-y-180');
-        }
-
-        // ================= APP INITIALIZATION =================
+        // ================= INIT & UI CONTROLS =================
         buildContinuousFeed();
         buildCoverflow();
 
-        // HUD ELEVATOR LOGIC
         function scrollToCategory(cat) {
             const targetSlide = document.querySelector(`.slide[data-category="${cat}"]`);
-            if(targetSlide) {
-                targetSlide.scrollIntoView({ behavior: 'smooth' });
-            }
+            if(targetSlide) targetSlide.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // MENU TOGGLES
         function toggleMenu(id) {
             const menu = document.getElementById(id);
-            if (id === 'links') {
-                menu.classList.toggle('translate-y-full');
-            } else {
-                menu.classList.toggle('translate-x-full');
-            }
+            if (id === 'links') menu.classList.toggle('translate-y-full');
+            else menu.classList.toggle('translate-x-full');
         }
 
-        // GLOBAL TAP TO UNMUTE
         let isMuted = true;
         document.body.addEventListener('click', (e) => {
             if(e.target.closest('.slide')) {
