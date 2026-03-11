@@ -23,17 +23,10 @@
     <style>
         body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; touch-action: pan-y; }
         
-        /* FILM GRAIN OVERLAY */
-        .noise {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            pointer-events: none; z-index: 9999; opacity: 0.04;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-        }
-
         /* DESKTOP BOXING */
         .app-shell {
             width: 100%; height: 100dvh; max-width: 500px; margin: 0 auto;
-            position: relative; background: #050505; overflow: hidden;
+            position: relative; background: #000; overflow: hidden;
         }
 
         /* NATIVE VIDEO FEED */
@@ -45,10 +38,11 @@
         .slide {
             height: 100%; scroll-snap-align: start; scroll-snap-stop: always;
             position: relative; display: flex; align-items: center; justify-content: center;
+            background: #000;
         }
         video {
             width: 100%; height: 100%; object-fit: contain; pointer-events: none;
-            filter: contrast(1.15) brightness(0.9); background: #000;
+            filter: contrast(1.1) brightness(0.9);
         }
 
         /* HUD UI */
@@ -62,97 +56,99 @@
 
         .overlay-menu {
             transition: transform 0.5s cubic-bezier(0.85, 0, 0.15, 1);
-            background: #000;
         }
 
-        /* ================= WOW FACTOR: 3D PARALLAX STORE ================= */
+        /* ================= 3D PARALLAX STORE UI ================= */
         
-        /* Vibrant Neon Ambient Glow */
         #store-bg {
-            position: absolute; inset: -10%; z-index: 0;
+            position: absolute; inset: -20%; z-index: 0;
             background-size: cover; background-position: center;
-            filter: blur(15px) brightness(0.5) saturate(1.8);
-            transition: background-image 0.5s ease;
+            filter: blur(30px) brightness(0.4) saturate(1.5);
+            transition: background-image 0.4s ease;
         }
 
         .coverflow-container {
-            scroll-snap-type: x mandatory; scrollbar-width: none; 
-            padding: 0 50vw; /* Padding forces center alignment on first/last items */
+            scroll-snap-type: x mandatory; scrollbar-width: none;
+            /* Perfectly centers a 260px wide box on any screen */
+            padding: 0 calc(50vw - 130px); 
+            gap: 40px;
             perspective: 1200px;
         }
         .coverflow-container::-webkit-scrollbar { display: none; }
 
         .album-wrapper {
             scroll-snap-align: center;
-            width: 70vw; max-w: 300px; 
-            margin: 0 -35vw; /* Overlap logic for tight spacing */
-            padding: 0 4vw; /* Inner spacing */
-            flex-shrink: 0;
-            display: flex; flex-col; items-center; justify-center;
+            flex-shrink: 0; width: 260px;
+            display: flex; flex-direction: column; align-items: center;
         }
 
-        /* The 3D Jewel Case Architecture */
+        /* TRUE 3D ARCHITECTURE */
         .album-box {
             position: relative;
-            width: 100%; aspect-ratio: 1/1;
+            width: 260px; height: 260px;
             transform-style: preserve-3d;
-            /* Rotation is handled dynamically via Javascript Parallax */
+            /* Base rotation overridden by JS parallax */
+            transform: rotateY(0deg); 
+            transition: filter 0.3s ease;
+        }
+
+        /* Darken albums that aren't in the center */
+        .album-wrapper:not(.active-album) .album-box {
+            filter: grayscale(80%) brightness(0.4);
         }
 
         .album-face {
-            position: absolute; inset: 0;
+            position: absolute;
             backface-visibility: hidden;
-            border: 1px solid rgba(255,255,255,0.15);
-            background: #000;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            background: #111;
         }
 
-        /* 15px depth creates a 30px thick CD Case */
-        .face-front { transform: translateZ(15px); }
-        .face-back { transform: rotateY(180deg) translateZ(15px); }
+        /* Front: pushed 15px forward */
+        .face-front {
+            width: 100%; height: 100%;
+            transform: translateZ(15px);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
         
-        /* The Fake Spine */
+        /* Back: flipped and pushed 15px backward */
+        .face-back {
+            width: 100%; height: 100%;
+            transform: rotateY(180deg) translateZ(15px);
+        }
+        
+        /* Left Spine: 30px wide, pivoted 90 degrees on left edge */
         .face-spine-left {
             width: 30px; height: 100%;
-            left: 0; top: 0;
-            transform-origin: left;
-            transform: translateX(0) rotateY(-90deg);
-            /* Sleek plastic jewel case gradient */
-            background: linear-gradient(90deg, #111 0%, #3a3a3a 20%, #1a1a1a 80%, #000 100%);
-            border-left: 1px solid rgba(255,255,255,0.3);
+            left: -15px; top: 0;
+            transform: rotateY(-90deg);
+            background: linear-gradient(90deg, #111 0%, #3a3a3a 15%, #1a1a1a 85%, #000 100%);
             display: flex; align-items: center; justify-content: center;
+            border-left: 1px solid rgba(255,255,255,0.4);
         }
 
-        /* Spine Typography */
+        /* Typography stamped down the spine */
         .spine-text {
             writing-mode: vertical-rl;
             transform: rotate(180deg);
             font-size: 10px; font-weight: 900; letter-spacing: 2px;
-            color: rgba(255,255,255,0.7); text-transform: uppercase;
+            color: rgba(255,255,255,0.6); text-transform: uppercase;
             white-space: nowrap;
         }
 
         .glass-glare {
             position: absolute; inset: 0; pointer-events: none; z-index: 10;
-            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 40%);
+            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 50%);
         }
 
-        /* Info & Buttons Fade In */
+        /* INFO & BUTTONS */
         .album-info-box {
-            opacity: 0.3; transform: scale(0.9); transition: all 0.4s ease;
-            height: 120px; display: flex; flex-direction: column; justify-content: space-between;
+            width: 110%; margin-top: 30px;
+            opacity: 0.2; transform: translateY(10px); transition: all 0.4s ease;
         }
         
         .album-wrapper.active-album .album-info-box {
-            opacity: 1; transform: scale(1);
-        }
-
-        /* Store Background Marquee Text */
-        .store-bg-text {
-            position: absolute; top: 12%; left: -50%; width: 200%;
-            font-size: 14rem; font-style: italic; font-weight: 900; line-height: 0.8;
-            color: rgba(255,255,255,0.04); pointer-events: none; white-space: nowrap; z-index: 0;
-            text-align: center;
+            opacity: 1; transform: translateY(0);
         }
     </style>
 </head>
@@ -204,14 +200,12 @@
                 <a href="https://www.instagram.com/lilwhitelie519" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:text-zinc-500 transition-colors">INSTAGRAM</a>
                 <a href="https://www.youtube.com/@ThaLilWhiteLie" target="_blank" class="block text-5xl md:text-6xl italic font-black tracking-tighter hover:text-zinc-500 transition-colors">YOUTUBE</a>
             </div>
-            <div class="store-bg-text">CONNECT</div>
         </div>
 
-        <!-- STORE OVERLAY (3D SCROLL PARALLAX) -->
-        <div id="store" class="fixed inset-0 z-[200] overlay-menu translate-x-full flex flex-col overflow-hidden">
+        <!-- 3D STORE OVERLAY -->
+        <div id="store" class="fixed inset-0 z-[200] overlay-menu translate-x-full flex flex-col overflow-hidden bg-black">
             
             <div id="store-bg"></div>
-            <div class="store-bg-text mt-16">DISCOGRAPHY</div>
             
             <div class="p-8 flex justify-between items-center shrink-0 relative z-10">
                 <h2 class="text-6xl font-black italic tracking-tighter drop-shadow-xl">STORE</h2>
@@ -219,19 +213,20 @@
             </div>
             
             <!-- APPAREL BANNER -->
-            <div class="px-8 pb-2 shrink-0 relative z-10">
-                <div class="bg-black/40 backdrop-blur-xl border border-white/20 p-4 flex justify-between items-center shadow-2xl">
+            <div class="px-8 pb-4 shrink-0 relative z-10">
+                <div class="bg-black/60 backdrop-blur-xl border border-white/20 p-4 flex justify-between items-center shadow-2xl">
                     <div>
                         <p class="text-[9px] uppercase tracking-[0.3em] text-white/50 font-black mb-1">Apparel</p>
                         <p class="text-[14px] font-black italic tracking-tighter uppercase leading-tight drop-shadow-md">Hand-Pressed<br>Shirt</p>
                     </div>
                     <a href="#" class="bg-white text-black px-5 py-2 font-black italic text-xs hover:invert transition-all">BUY (45)</a>
                 </div>
+                <p class="pt-6 text-[10px] uppercase tracking-[0.3em] opacity-50 font-black">Discography</p>
             </div>
 
-            <!-- THE 3D COVERFLOW TRACK -->
-            <div id="coverflow-track" class="coverflow-container flex-1 flex overflow-x-auto items-center pt-8 relative z-10">
-                <!-- Albums injected here via JS -->
+            <!-- THE 3D SCROLL TRACK -->
+            <div id="coverflow-track" class="coverflow-container flex-1 flex overflow-x-auto items-center relative z-10">
+                <!-- Albums Injected via JS -->
             </div>
             
             <p class="shrink-0 mt-auto text-[9px] bg-black/80 backdrop-blur-md uppercase font-black tracking-[0.3em] text-center border-t border-white/10 py-5 relative z-20">
@@ -284,6 +279,7 @@
             ]
         };
 
+        // WebP, Width 600, Auto Quality. Instant Loading.
         const albums =[
             { 
                 title: "Antisocial Antihero", 
@@ -317,7 +313,7 @@
             }
         ];
 
-        const shuffle = (array) => [...array].sort(() => Math.random() - 0.5);
+        const shuffle = (array) =>[...array].sort(() => Math.random() - 0.5);
         const feed = document.getElementById('feed');
         
         // ================= CONTINUOUS FEED ENGINE =================
@@ -359,72 +355,69 @@
             document.querySelectorAll('.slide').forEach(s => feedObserver.observe(s));
         }
 
-        // ================= 3D PARALLAX COVERFLOW =================
+        // ================= 3D STORE ENGINE =================
         function buildCoverflow() {
             const track = document.getElementById('coverflow-track');
             
             albums.forEach((album) => {
                 const item = document.createElement('div');
-                item.className = 'album-wrapper flex flex-col items-center';
+                item.className = 'album-wrapper';
                 item.setAttribute('data-bg', album.front);
                 
-                // Construct the CSS 3D Box
+                // Construct the 3D Box
                 item.innerHTML = `
-                    <div class="album-box">
-                        <!-- Front Face -->
+                    <div class="album-box shadow-[0_30px_60px_rgba(0,0,0,0.8)]">
+                        <!-- FRONT -->
                         <div class="album-face face-front">
                             <img src="${album.front}" class="w-full h-full object-cover">
                             <div class="glass-glare"></div>
                         </div>
-                        <!-- Fake Spine Face -->
+                        <!-- SPINE -->
                         <div class="album-face face-spine-left">
                             <span class="spine-text">WH!TE L!E - ${album.title}</span>
                         </div>
-                        <!-- Back Face -->
+                        <!-- BACK -->
                         <div class="album-face face-back">
                             <img src="${album.back}" class="w-full h-full object-cover">
                             <div class="glass-glare"></div>
                         </div>
                     </div>
                     
-                    <!-- PERFECTLY ALIGNED TITLES & BUTTONS -->
-                    <div class="album-info-box w-full mt-10 text-center">
-                        <div class="h-14 flex items-center justify-center mb-3">
-                            <h3 class="text-xl md:text-2xl font-black italic uppercase leading-tight drop-shadow-md px-4">${album.title}</h3>
+                    <div class="album-info-box">
+                        <div class="h-12 flex items-center justify-center mb-3">
+                            <h3 class="text-xl md:text-2xl font-black italic uppercase text-center leading-tight drop-shadow-md px-2">${album.title}</h3>
                         </div>
-                        <div class="flex gap-2 justify-center w-full">
-                            <a href="${album.phys}" class="flex-1 bg-white text-black py-3 text-[10px] uppercase tracking-widest font-black italic hover:invert transition-all text-center shadow-lg">PHYSICAL</a>
-                            <a href="${album.digi}" class="flex-1 border-2 border-white/50 text-white py-3 text-[10px] uppercase tracking-widest font-black italic hover:bg-white hover:text-black transition-all text-center bg-black/40 backdrop-blur-md">DIGITAL</a>
+                        <div class="flex gap-3 justify-center w-full">
+                            <a href="${album.phys}" class="flex-1 bg-white text-black py-4 text-[11px] uppercase tracking-widest font-black italic hover:invert transition-all text-center shadow-lg">PHYSICAL</a>
+                            <a href="${album.digi}" class="flex-1 border-2 border-white/50 text-white py-4 text-[11px] uppercase tracking-widest font-black italic hover:bg-white hover:text-black transition-all text-center bg-black/40 backdrop-blur-md">DIGITAL</a>
                         </div>
                     </div>
                 `;
                 track.appendChild(item);
             });
 
-            // The Scroll-Linked 3D Engine
-            function updateParallax() {
+            // The Math: Tie scroll position directly to 3D rotation
+            function applyParallax() {
                 const trackRect = track.getBoundingClientRect();
                 const trackCenter = trackRect.left + trackRect.width / 2;
-                const albumWrappers = document.querySelectorAll('.album-wrapper');
-
-                albumWrappers.forEach(wrapper => {
+                
+                document.querySelectorAll('.album-wrapper').forEach(wrapper => {
                     const rect = wrapper.getBoundingClientRect();
-                    const cardCenter = rect.left + rect.width / 2;
-                    const offset = cardCenter - trackCenter;
+                    const itemCenter = rect.left + rect.width / 2;
+                    const offset = itemCenter - trackCenter;
                     
-                    // Math: Calculates how far off center it is, and converts to a rotation degree
-                    const percentage = offset / trackRect.width;
-                    let angle = percentage * -160; 
+                    // Convert offset pixels to rotation degrees
+                    let rotateAmount = (offset / trackRect.width) * 60;
                     
-                    // Cap the spin so it doesn't break logic
-                    angle = Math.max(-180, Math.min(180, angle));
+                    // Cap rotation to keep it readable
+                    rotateAmount = Math.max(-80, Math.min(80, rotateAmount));
 
-                    // Apply the 3D Rotation to the Box
+                    // Apply the 3D spin
                     const box = wrapper.querySelector('.album-box');
-                    box.style.transform = `rotateY(${angle}deg)`;
+                    if (box) box.style.transform = `rotateY(${rotateAmount}deg)`;
 
-                    // Active State Trigger (For Glow & Background Change)
-                    if (Math.abs(offset) < trackRect.width * 0.25) {
+                    // Trigger the Room Glow when in center
+                    if (Math.abs(offset) < trackRect.width * 0.3) {
                         wrapper.classList.add('active-album');
                         const bgImg = wrapper.getAttribute('data-bg');
                         document.getElementById('store-bg').style.backgroundImage = `url('${bgImg}')`;
@@ -432,10 +425,9 @@
                         wrapper.classList.remove('active-album');
                     }
                 });
-                requestAnimationFrame(updateParallax);
+                requestAnimationFrame(applyParallax);
             }
-            // Kick off the physics engine
-            requestAnimationFrame(updateParallax);
+            requestAnimationFrame(applyParallax);
         }
 
         // ================= INIT & CONTROLS =================
@@ -453,6 +445,7 @@
             else menu.classList.toggle('translate-x-full');
         }
 
+        // GLOBAL TAP TO UNMUTE
         let isMuted = true;
         document.body.addEventListener('click', (e) => {
             if(e.target.closest('.slide')) {
